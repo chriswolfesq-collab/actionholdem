@@ -486,7 +486,7 @@ Target:
 
 
 <br>
-<button onclick="openRules()">📖 Rules</button><div class="smallNote">Flop, Turn, River, and Showdown scoring happen automatically at the correct time.</div>
+<button onclick="openRules()">📖 How to Play & Rules</button><div class="smallNote">Flop, Turn, River, and Showdown scoring happen automatically at the correct time.</div>
 </div>
 
 <div class="statusBar">
@@ -576,52 +576,6 @@ Target:
   <div class="rulesContent">
     <button onclick="closeRules()">Close</button>
     <h2>Action Hold 'Em Rules</h2>
-    <h3>How to Play</h3>
-
-    <p><strong>Goal:</strong> Be the first player to reach the target score. Once a player reaches the target score, the current hand becomes the final hand. After that hand is scored, the highest total score wins.</p>
-
-    <h4>Starting a Hand</h4>
-    <ul>
-      <li>Each player starts with 2 cards.</li>
-      <li>No community cards are revealed yet.</li>
-      <li>The game begins in the Pre-Flop phase.</li>
-    </ul>
-
-    <h4>Your Turn</h4>
-    <ol>
-      <li><strong>Draw</strong> from either the Deck or the Discard Pile.</li>
-      <li><strong>Discard</strong> one card from your hand.</li>
-    </ol>
-
-    <p>You may discard a normal card or play an Action Card. Your turn ends immediately after discarding.</p>
-
-    <h4>Community Cards</h4>
-    <ul>
-      <li><strong>Flop:</strong> 3 community cards revealed.</li>
-      <li><strong>Turn:</strong> 1 additional community card revealed.</li>
-      <li><strong>River:</strong> 1 final community card revealed.</li>
-      <li><strong>Showdown:</strong> All hands are scored automatically.</li>
-    </ul>
-
-    <h4>Building Your Hand</h4>
-    <ul>
-      <li>Use your hand cards and the community cards.</li>
-      <li>Only 5 cards may be used to create a scoring hand.</li>
-    </ul>
-
-    <h4>Important Rules</h4>
-    <ul>
-      <li>Action Cards cannot appear in the community cards.</li>
-      <li>Wild Cards cannot appear in the community cards.</li>
-      <li>Action Cards cannot be drawn from the discard pile.</li>
-      <li>If you draw from the discard pile, you cannot immediately discard that same card.</li>
-      <li>Skip causes a player to lose their next turn.</li>
-      <li>Face Up forces a player's hand to remain visible.</li>
-    </ul>
-
-    <h4>End of Hand</h4>
-    <p>After the River round, all hands are scored, action card penalties are applied, bonuses are awarded, and scores are added to the scoreboard.</p>
-
 
     <h3>Scoring</h3>
     <ul>
@@ -1788,7 +1742,8 @@ function hiddenHandHtml(player){
                 <div class="backLogo">
                     <div class="backAction">ACTION</div>
                     <div class="backHoldem">HOLD 'EM</div>
-                    <div class="backSuits">♥ ♣ ♦ ♠</div>
+                    <div class="cornerClub">♣</div>
+                    <div class="cornerHeart">♥</div>
                 </div>
             </div>
         `;
