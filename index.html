@@ -570,10 +570,6 @@ Target:
 
 <div class="section"><h3>Scoreboard</h3><div id="scoreboard"></div></div>
 
-<div class="statusBar">
-  <div class="statusBox"><strong>Current Phase</strong><div id="phase"></div></div>
-  <div class="statusBox"><strong>Turn State</strong><div id="turnState"></div></div>
-</div>
 
 <div class="section">
 <h3>Players</h3>
@@ -2323,7 +2319,7 @@ function evaluateConcreteFive(cards, usedWild){
             label:natural ? "Natural Straight Flush" : "Straight Flush",
             points:natural ? 300 : 225,
             tie:[straightHigh],
-            cardsUsed: combo.map(c=>c.name)
+            cardsUsed: cards.map(c=>c.name)
         };
     }
 
@@ -2334,7 +2330,7 @@ function evaluateConcreteFive(cards, usedWild){
             label:natural ? "Natural Four of a Kind" : "Four of a Kind",
             points:natural ? 200 : 150,
             tie:[fourRank,kicker],
-            cardsUsed: combo.map(c=>c.name)
+            cardsUsed: cards.map(c=>c.name)
         };
     }
 
@@ -2343,7 +2339,7 @@ function evaluateConcreteFive(cards, usedWild){
             label:"Full House",
             points:125,
             tie:[groups[0].rank, groups[1].rank],
-            cardsUsed: combo.map(c=>c.name)
+            cardsUsed: cards.map(c=>c.name)
         };
     }
 
@@ -2352,7 +2348,7 @@ function evaluateConcreteFive(cards, usedWild){
             label:"Flush",
             points:100,
             tie:ranks,
-            cardsUsed: combo.map(c=>c.name)
+            cardsUsed: cards.map(c=>c.name)
         };
     }
 
@@ -2361,7 +2357,7 @@ function evaluateConcreteFive(cards, usedWild){
             label:"Straight",
             points:80,
             tie:[straightHigh],
-            cardsUsed: combo.map(c=>c.name)
+            cardsUsed: cards.map(c=>c.name)
         };
     }
 
@@ -2371,7 +2367,7 @@ function evaluateConcreteFive(cards, usedWild){
             label:"Three of a Kind",
             points:40,
             tie:[groups[0].rank,...kickers],
-            cardsUsed: combo.map(c=>c.name)
+            cardsUsed: cards.map(c=>c.name)
         };
     }
 
@@ -2382,7 +2378,7 @@ function evaluateConcreteFive(cards, usedWild){
             label:"Two Pair",
             points:30,
             tie:[...pairs,kicker],
-            cardsUsed: combo.map(c=>c.name)
+            cardsUsed: cards.map(c=>c.name)
         };
     }
 
@@ -2393,7 +2389,7 @@ function evaluateConcreteFive(cards, usedWild){
             label:"One Pair",
             points:-25,
             tie:[pair,...kickers],
-            cardsUsed: combo.map(c=>c.name)
+            cardsUsed: cards.map(c=>c.name)
         };
     }
 
@@ -2413,7 +2409,7 @@ function expandAndEvaluateFive(combo){
             label:"Four of a Kind (All Wild Cards)",
             points:200,
             tie:[14],
-            cardsUsed: combo.map(c=>c.name)
+            cardsUsed: cards.map(c=>c.name)
         };
     }
 
@@ -2551,12 +2547,7 @@ function showdown(){
 
     const tiedBest=results.filter(result=>compareEvaluations(result.handEval,bestResult.handEval)===0);
 
-    results.forEach(result=>{
-        result.isBestHandWinner = tiedBest.some(
-            winner => winner.playerIndex === result.playerIndex
-        );
-    });
-
+    
     const mvpNames=tiedBest.map(r=>r.player.name).join(", ");
     showMVPModal(mvpNames,bestResult.handEval.label,bestResult.handEval.points);
 
