@@ -1,0 +1,2298 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Action Hold 'Em v5.7 Custom Card Backs</title>
+<style>
+:root{
+    --felt:#0f5132;
+    --felt-dark:#083b24;
+    --panel:rgba(255,255,255,.12);
+    --panel-border:rgba(255,255,255,.35);
+}
+*{box-sizing:border-box;}
+body{
+    font-family:Arial,sans-serif;
+    text-align:center;
+    background:radial-gradient(circle at center, #167a4a 0%, var(--felt) 55%, var(--felt-dark) 100%);
+    color:white;
+    padding:18px;
+    margin:0;
+}
+h1{margin-bottom:4px;}
+h3{margin-top:8px;}
+button{
+    padding:11px 18px;
+    font-size:15px;
+    margin:5px;
+    cursor:pointer;
+    border:0;
+    border-radius:8px;
+    font-weight:bold;
+}
+button:disabled{
+    opacity:.45;
+    cursor:not-allowed;
+}
+.controls{
+    background:rgba(0,0,0,.22);
+    border:1px solid var(--panel-border);
+    border-radius:14px;
+    padding:10px;
+    max-width:950px;
+    margin:12px auto;
+}
+.card{
+    display:inline-flex;
+    justify-content:center;
+    align-items:center;
+    flex-direction:column;
+    border-radius:10px;
+    border:1px solid black;
+    width:104px;
+    height:76px;
+    padding:8px;
+    margin:5px;
+    font-weight:bold;
+    vertical-align:top;
+    box-shadow:0 3px 8px rgba(0,0,0,.3);
+    font-size:14px;
+}
+.card.clickable{cursor:pointer;}
+.card.clickable:hover{transform:translateY(-4px) scale(1.03);}
+.standard{background:white;color:black;}
+.wild{background:#111;color:white;}
+.skip{background:#2E86DE;color:white;}
+.bonus{background:#27AE60;color:white;}
+.burn{background:#C0392B;color:white;}
+.reset{background:#E67E22;color:white;}
+.info{background:#8E44AD;color:white;}
+.swap{background:#F1C40F;color:black;}
+.hiddenCard{background:#1f1f1f;color:white;border:1px solid #777;}
+.deckBack,
+.cardBack{
+    background:#000;
+    border:2px solid #ffffff;
+    position:relative;
+    overflow:hidden;
+    color:white;
+    cursor:pointer;
+}
+
+.deckBack::before,
+.cardBack::before{
+    content:"♦";
+    position:absolute;
+    top:8px;
+    left:10px;
+    font-size:30px;
+    color:#e53935;
+    font-weight:bold;
+}
+
+.deckBack::after,
+.cardBack::after{
+    content:"♠";
+    position:absolute;
+    top:8px;
+    right:10px;
+    font-size:30px;
+    color:#1e88e5;
+    font-weight:bold;
+}
+
+.backLogo{
+    position:absolute;
+    inset:0;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+}
+
+.backAction{
+    font-size:20px;
+    font-weight:900;
+    background:linear-gradient(#ffd54f,#ff9800);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+}
+
+.backHoldem{
+    color:white;
+    font-size:13px;
+    font-weight:900;
+}
+
+.cornerClub{
+    position:absolute;
+    bottom:8px;
+    left:10px;
+    font-size:24px;
+    color:#1e88e5;
+    font-weight:bold;
+}
+
+.cornerHeart{
+    position:absolute;
+    bottom:8px;
+    right:10px;
+    font-size:24px;
+    color:#e53935;
+    font-weight:bold;
+}
+.section{margin-top:18px;}
+.statusBar{
+    display:flex;
+    justify-content:center;
+    flex-wrap:wrap;
+    gap:10px;
+    margin:12px auto;
+}
+.statusBox{
+    background:white;
+    color:black;
+    padding:12px 18px;
+    border-radius:10px;
+    min-width:170px;
+    box-shadow:0 3px 8px rgba(0,0,0,.25);
+}
+.tableArea{
+    max-width:1100px;
+    margin:18px auto;
+    display:grid;
+    grid-template-columns:1fr 1.5fr 1fr;
+    gap:14px;
+    align-items:start;
+}
+.panel{
+    background:var(--panel);
+    border:1px solid var(--panel-border);
+    border-radius:16px;
+    padding:12px;
+    backdrop-filter:blur(2px);
+}
+.communityPanel{min-height:280px;}
+.playerGrid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(190px,1fr));
+    gap:10px;
+    max-width:1050px;
+    margin:0 auto;
+}
+.playerBox{
+    background:rgba(255,255,255,.13);
+    border:1px solid rgba(255,255,255,.35);
+    border-radius:14px;
+    padding:10px;
+    min-height:130px;
+}
+.currentPlayer{
+    outline:3px solid #F1C40F;
+    background:rgba(255,255,255,.22);
+}
+.effect{
+    display:inline-block;
+    background:#222;
+    color:white;
+    border-radius:12px;
+    padding:3px 8px;
+    margin:3px;
+    font-size:12px;
+}
+#log{
+    background:white;
+    color:black;
+    width:100%;
+    max-width:950px;
+    margin:auto;
+    padding:10px;
+    border-radius:10px;
+    text-align:left;
+    height:180px;
+    overflow-y:auto;
+}
+#results{
+    background:white;
+    color:black;
+    width:100%;
+    max-width:1000px;
+    margin:auto;
+    padding:10px;
+    border-radius:10px;
+    text-align:left;
+    overflow:auto;
+}
+#scoreboard{
+    background:white;
+    color:black;
+    width:100%;
+    max-width:600px;
+    margin:auto;
+    padding:10px;
+    border-radius:10px;
+}
+table{border-collapse:collapse;width:100%;}
+th,td{border:1px solid #ccc;padding:7px;text-align:left;}
+.smallNote{font-size:13px;opacity:.9;}
+.passScreen{
+    background:rgba(0,0,0,.35);
+    border:2px solid rgba(255,255,255,.35);
+    border-radius:14px;
+    padding:20px;
+    margin:10px 0;
+    text-align:center;
+}
+.passPlayer{
+    font-size:28px;
+    font-weight:bold;
+    margin:15px 0;
+}
+
+/* v5.3 card visual upgrade */
+.card{
+    width:90px;
+    height:130px;
+    min-width:90px;
+    min-height:130px;
+}
+
+.pokerCard{
+    background:white;
+    border:2px solid #222;
+    border-radius:10px;
+    position:relative;
+    padding:0;
+    overflow:hidden;
+    display:inline-block;
+    box-shadow:0 4px 10px rgba(0,0,0,.35);
+}
+
+.pokerCard.redCard{ color:#d00000; }
+.pokerCard.blackCard{ color:#111; }
+
+.cardCorner{
+    position:absolute;
+    text-align:center;
+    font-weight:900;
+    font-size:18px;
+    line-height:1;
+}
+
+.cardCorner.topLeft{
+    top:7px;
+    left:8px;
+}
+
+.cardCorner.bottomRight{
+    bottom:7px;
+    right:8px;
+    transform:rotate(180deg);
+}
+
+.centerSuit{
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    font-size:50px;
+    line-height:1;
+}
+
+.wildFace{
+    background:#111;
+    color:white;
+    border:2px solid white;
+    font-weight:900;
+    font-size:18px;
+}
+
+.wildSuitGrid{
+    font-size:26px;
+    line-height:1.1;
+}
+
+.actionFace{
+    color:white;
+    border:2px solid #222;
+    border-radius:10px;
+    padding:8px;
+    display:inline-flex;
+    flex-direction:column;
+    justify-content:space-between;
+    align-items:center;
+    text-align:center;
+    font-weight:900;
+    box-shadow:0 4px 10px rgba(0,0,0,.35);
+}
+
+.actionIcon{
+    font-size:32px;
+    line-height:1;
+    margin-top:4px;
+}
+
+.actionTitle{
+    font-size:18px;
+    line-height:1.05;
+    text-transform:uppercase;
+}
+
+.actionPenalty{
+    align-self:flex-end;
+    font-size:22px;
+}
+
+.targetBadge{
+    position:absolute;
+    top:5px;
+    left:5px;
+    font-size:16px;
+    background:rgba(255,255,255,.2);
+    border-radius:50%;
+    width:24px;
+    height:24px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.deckBack,
+.cardBack{
+    width:90px;
+    height:130px;
+    min-width:90px;
+    min-height:130px;
+}
+
+@media(max-width:850px){
+    .tableArea{grid-template-columns:1fr;}
+    .card{width:92px;height:70px;font-size:13px;}
+}
+
+.pokerTableLayout{
+    max-width:1400px;
+    margin:18px auto;
+    display:grid;
+    grid-template-columns:260px 1fr 260px;
+    gap:18px;
+    align-items:start;
+}
+
+.communityPanel{
+    min-height:420px;
+}
+
+#communityRow{
+    min-height:180px;
+}
+
+.leftPanel,.rightPanel{
+    position:sticky;
+    top:10px;
+}
+
+@media(max-width:1000px){
+    .pokerTableLayout{
+        grid-template-columns:1fr;
+    }
+}
+
+
+.rulesModal{
+ display:none;
+ position:fixed;
+ inset:0;
+ background:rgba(0,0,0,.75);
+ z-index:9999;
+ overflow:auto;
+}
+.rulesContent{
+ background:white;
+ color:black;
+ max-width:900px;
+ margin:40px auto;
+ padding:20px;
+ border-radius:12px;
+ text-align:left;
+}
+
+
+.pageLogo{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    margin:10px 0 20px 0;
+}
+.pageLogo .logoAction{
+    font-size:48px;
+    font-weight:900;
+    background:linear-gradient(#ffd54f,#ff9800);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+}
+.pageLogo .logoHoldem{
+    font-size:28px;
+    font-weight:900;
+    color:white;
+}
+.pageLogo .logoSuits{
+    font-size:22px;
+    letter-spacing:8px;
+}
+
+</style>
+</head>
+<body>
+
+    <div class="pageLogo">
+        <div class="logoAction">ACTION</div>
+        <div class="logoHoldem">HOLD 'EM</div>
+        <div class="logoSuits">♥ ♣ ♦ ♠</div>
+    </div>
+    
+<div class="panel" style="max-width:700px;margin:10px auto;">
+<h3>Local Multiplayer Setup</h3>
+Players:
+<select id="playerCountSelect" onchange="updatePlayerCountFromDropdown()">
+<option value="2">2</option>
+<option value="3">3</option>
+<option value="4" selected>4</option>
+<option value="5">5</option>
+<option value="6">6</option>
+</select>
+
+Target:
+<select id="targetScoreSelect" onchange="updateTargetScore()">
+<option>300</option>
+<option>400</option>
+<option selected>500</option>
+<option>600</option>
+<option>700</option>
+<option>800</option>
+<option>900</option>
+<option>1000</option>
+<option>1250</option>
+<option>1500</option>
+</select>
+
+<button onclick="setupPlayers()">Set Player Names</button>
+
+</div>
+
+<h3>v5.6 — Rules Button</h3>
+
+<div class="controls">
+
+
+<br>
+<button onclick="openRules()">📖 Rules</button><div class="smallNote">Flop, Turn, River, and Showdown scoring happen automatically at the correct time.</div>
+</div>
+
+<div class="statusBar">
+  <div class="statusBox"><strong>Current Phase</strong><div id="phase"></div></div>
+  <div class="statusBox"><strong>Turn State</strong><div id="turnState"></div></div>
+</div>
+
+
+
+<div class="section"><h3>Scoreboard</h3><div id="scoreboard"></div></div>
+
+<div class="section">
+<h3>Players</h3>
+<div class="smallNote">Opponent cards stay hidden unless Face Up, Peeked, or during Showdown.</div>
+<div id="players" class="playerGrid"></div>
+</div>
+
+<div class="tableArea pokerTableLayout">
+    <div class="panel leftPanel">
+        <h3>Deck</h3>
+
+        <div
+            class="card deckBack clickable"
+            onclick="drawFromDeck()">
+            <div class="backLogo">
+                <div class="backAction">ACTION</div>
+                <div class="backHoldem">HOLD 'EM</div>
+                <div class="cornerClub">♣</div>
+                <div class="cornerHeart">♥</div>
+            </div>
+        </div>
+
+        <div id="deckCount"></div>
+
+        <div style="margin-top:10px;">
+            <button id="drawBtn" onclick="drawFromDeck()">
+                Draw From Deck
+            </button>
+        </div>
+
+        <h3 style="margin-top:20px;">Burn Pile</h3>
+        <div id="burnCount"></div>
+
+        <h3 style="margin-top:20px;">Discard Pile</h3>
+        <div class="smallNote">Only the top card is available.</div>
+        <div id="discard"></div>
+
+        <div style="margin-top:15px;">
+            <button id="drawDiscardBtn" onclick="drawFromDiscard()">
+                Draw From Discard
+            </button>
+        </div>
+    </div>
+
+    <div class="panel communityPanel">
+        <h3>Community Cards</h3>
+
+        <div id="communityRow" style="display:flex;justify-content:center;align-items:center;gap:14px;flex-wrap:nowrap;">
+            <div id="flop"></div>
+            <div id="turn"></div>
+            <div id="river"></div>
+        </div>
+
+        <div style="margin-top:20px;">
+            <button id="nextHandBtn" onclick="startNewHand()">
+                Start Next Hand
+            </button>
+        </div>
+    </div>
+
+    <div class="panel rightPanel">
+        <h3>Current Player Hand</h3>
+        <div class="smallNote">During MUST DISCARD, click a card to discard it or play it as an Action Card.</div>
+
+        <div id="revealHandArea" style="margin-bottom:10px;"></div>
+
+        <div id="hand"></div>
+    </div>
+</div>
+<div class="section"><h3>Showdown Results</h3><div id="results"></div></div>
+<div class="section"><h3>Game Log</h3><div id="log"></div></div>
+
+
+<div id="rulesModal" class="rulesModal">
+  <div class="rulesContent">
+    <button onclick="closeRules()">Close</button>
+    <h2>Action Hold 'Em Rules</h2>
+
+    <h3>Scoring</h3>
+    <ul>
+      <li>Natural Royal Flush = 500</li>
+      <li>Royal Flush = 350</li>
+      <li>Natural Straight Flush = 300</li>
+      <li>Straight Flush = 225</li>
+      <li>Natural Four of a Kind = 200</li>
+      <li>Four of a Kind = 150</li>
+      <li>Full House = 125</li>
+      <li>Flush = 100</li>
+      <li>Straight = 80</li>
+      <li>Three of a Kind = 40</li>
+      <li>Two Pair = 30</li>
+      <li>One Pair = -25</li>
+      <li>High Card = -50</li>
+    </ul>
+
+    <h3>Best Hand Bonus</h3>
+    <p>Best hand gets +30. Split among ties. No bonus if 4+ players tie.</p>
+
+    <h3>Action Cards</h3>
+    <ul>
+      <li>Skip: Target loses next turn.</li>
+      <li>Trade Hands: Swap hands with target.</li>
+      <li>Pass Left / Pass Right: Rotate all hands.</li>
+      <li>Burn: Target loses a random card.</li>
+      <li>Burn All: All opponents lose a random card.</li>
+      <li>Bonus: Draw an extra card.</li>
+      <li>Full Reset: Burn hand and draw 2 new cards.</li>
+      <li>Face Up: Hand remains visible.</li>
+      <li>Peek: View another player's hand.</li>
+      <li>Change Community: Replace a community card.</li>
+    </ul>
+
+    <h3>Wild Cards</h3>
+    <ul>
+      <li>True Wild = Any card.</li>
+      <li>Suit Wild = Any card of the matching suit.</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+let deck=[];
+let players=[];
+let currentPlayerIndex=0;
+let gameScores=[0,0,0,0];
+let handAlreadyScored=false;
+let handOver=false;
+
+let discardPile=[];
+let burnPile=[];
+let flop=[];
+let turnCard=null;
+let riverCard=null;
+let phase="PRE-FLOP";
+let turnState="MUST_DRAW";
+let nextCardId=1;
+let lastDrawnFromDiscardId=null;
+let turnsTakenThisRound=0;
+let handRevealed=false;
+let playerNames=['Player 1','Player 2','Player 3','Player 4','Player 5','Player 6','Player 7','Player 8','Player 9','Player 10'];
+let playerCount=4;
+let targetScore=500;
+let finalHandTriggered=false;
+
+
+function toggleSettings(){
+    const content=document.getElementById('settingsContent');
+    const btn=document.getElementById('settingsToggleBtn');
+
+    if(content.style.display==='none'){
+        content.style.display='block';
+        btn.textContent='Hide Settings';
+    }else{
+        content.style.display='none';
+        btn.textContent='⚙ Settings';
+    }
+}
+
+function openRules(){
+document.getElementById('rulesModal').style.display='block';
+}
+function closeRules(){
+document.getElementById('rulesModal').style.display='none';
+}
+
+function currentPlayer(){ return players[currentPlayerIndex]; }
+function log(message){ document.getElementById("log").innerHTML=message+"<br>"+document.getElementById("log").innerHTML; }
+function createCard(card){ return {id:nextCardId++,...card}; }
+
+function createDeck(){
+    deck=[]; nextCardId=1;
+    const suits=["♠","♥","♦","♣"];
+    const ranks=["A","K","Q","J","10","9","8","7","6","5","4","3","2"];
+    for(let suit of suits){ for(let rank of ranks){ deck.push(createCard({name:rank+suit,category:"standard",type:"standard"})); } }
+    deck.push(createCard({name:"True Wild",category:"wild",type:"wild"}));
+    deck.push(createCard({name:"True Wild",category:"wild",type:"wild"}));
+    for(let suit of suits){
+        deck.push(createCard({name:suit+" Wild",category:"wild",type:"wild",wildSuit:suit}));
+        deck.push(createCard({name:suit+" Wild",category:"wild",type:"wild",wildSuit:suit}));
+    }
+    for(let i=0;i<4;i++) deck.push(createCard({name:"Skip",category:"action",action:"skip",target:"targeted",penalty:-20,color:"skip"}));
+    for(let i=0;i<3;i++) deck.push(createCard({name:"Trade Hands",category:"action",action:"trade_hands",target:"targeted",penalty:-40,color:"swap"}));
+    deck.push(createCard({name:"Pass Left",category:"action",action:"pass_left",target:"all",penalty:-40,color:"swap"}));
+    deck.push(createCard({name:"Pass Right",category:"action",action:"pass_right",target:"all",penalty:-40,color:"swap"}));
+    for(let i=0;i<2;i++) deck.push(createCard({name:"Burn",category:"action",action:"burn_targeted",target:"targeted",penalty:-30,color:"burn"}));
+    deck.push(createCard({name:"Burn",category:"action",action:"burn_all",target:"all",penalty:-40,color:"burn"}));
+    for(let i=0;i<2;i++) deck.push(createCard({name:"Full Reset",category:"action",action:"full_reset_targeted",target:"targeted",penalty:-50,color:"reset"}));
+    for(let i=0;i<2;i++) deck.push(createCard({name:"Full Reset",category:"action",action:"full_reset_self",target:"self",penalty:-50,color:"reset"}));
+    deck.push(createCard({name:"Full Reset",category:"action",action:"full_reset_all",target:"all",penalty:-75,color:"reset"}));
+    for(let i=0;i<2;i++) deck.push(createCard({name:"Bonus",category:"action",action:"bonus_targeted",target:"targeted",penalty:-75,color:"bonus"}));
+    for(let i=0;i<2;i++) deck.push(createCard({name:"Bonus",category:"action",action:"bonus_self",target:"self",penalty:-30,color:"bonus"}));
+    for(let i=0;i<2;i++) deck.push(createCard({name:"Change Community",category:"action",action:"change_community",target:"targeted",penalty:-75,color:"reset"}));
+    deck.push(createCard({name:"Face Up",category:"action",action:"face_up_targeted",target:"targeted",penalty:-50,color:"info"}));
+    deck.push(createCard({name:"Face Up",category:"action",action:"face_up_self",target:"self",penalty:-75,color:"info"}));
+    for(let i=0;i<2;i++) deck.push(createCard({name:"Peek",category:"action",action:"peek_targeted",target:"targeted",penalty:-40,color:"info"}));
+    console.log("Deck Size:",deck.length);
+}
+
+function shuffle(array){ for(let i=array.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [array[i],array[j]]=[array[j],array[i]]; } }
+
+
+
+function updateTargetScore(){
+
+    const selector =
+        document.getElementById("targetScoreSelect");
+
+    if(selector){
+        targetScore =
+            parseInt(selector.value,10);
+    }
+
+    log("Target score set to " + targetScore);
+}
+
+function updatePlayerCountFromDropdown(){
+
+    const selector =
+        document.getElementById("playerCountSelect");
+
+    if(!selector) return;
+
+    const newCount =
+        parseInt(selector.value,10);
+
+    if(newCount === playerCount) return;
+
+    playerCount = newCount;
+
+    gameScores = Array(playerCount).fill(0);
+
+    startNewHand();
+
+    log("Player count changed to " + playerCount + ". New hand started automatically.");
+}
+
+function setupPlayers(){
+    updatePlayerCountFromDropdown();
+
+    for(let i=0;i<playerCount;i++){
+        const name = prompt("Name for Player "+(i+1), playerNames[i] || ("Player "+(i+1)));
+        if(name) playerNames[i]=name;
+    }
+    if(players.length){
+        players.forEach((p,i)=>p.name=playerNames[i] || ("Player "+(i+1)));
+    }
+    updateAll();
+}
+
+function revealCurrentHand(){
+    handRevealed=true;
+    updateAll();
+}
+
+function hideCurrentHand(){
+    handRevealed=false;
+    updateAll();
+}
+
+function startNewGame(){
+
+    updatePlayerCountFromDropdown();
+
+    gameScores=Array(playerCount).fill(0);
+    finalHandTriggered=false;
+    handAlreadyScored=false;
+    handOver=false;
+    document.getElementById("results").innerHTML="";
+    log("New game started. Scores reset to 0.");
+    startNewHand();
+}
+
+function startNewHand(){
+
+    handOver = false;
+    handAlreadyScored = false;
+    handRevealed = false;
+    turnsTakenThisRound = 0;
+
+    updatePlayerCountFromDropdown();
+
+    while(gameScores.length < playerCount){
+        gameScores.push(0);
+    }
+
+    if(gameScores.length > playerCount){
+        gameScores = gameScores.slice(0, playerCount);
+    }
+
+    createDeck(); shuffle(deck);
+    players=[];
+
+    for(let i=0;i<playerCount;i++){
+        players.push({
+            name: playerNames[i] || ("Player "+(i+1)),
+            hand: [],
+            effects:{faceUp:false, skip:false, bonus:false}
+        });
+    }
+    currentPlayerIndex=0;
+    discardPile=[]; burnPile=[]; flop=[]; turnCard=null; riverCard=null;
+    phase="PRE-FLOP"; turnState="MUST_DRAW"; lastDrawnFromDiscardId=null;
+    for(let p of players){ p.hand.push(deck.pop()); p.hand.push(deck.pop()); }
+    createInitialDiscard();
+    log("New hand started");
+    document.getElementById("results").innerHTML="";
+    updateAll();
+}
+
+function createInitialDiscard(){
+    while(deck.length>0){
+        const card=deck.pop();
+        if(card.category==="action"){ burnPile.push(card); log("Initial discard was Action Card; burned "+card.name); continue; }
+        discardPile.push(card); log("Initial discard set: "+card.name); return;
+    }
+}
+
+function ensureDiscardTopPlayable(){
+    while(discardPile.length>0){
+        const topCard=discardPile[discardPile.length-1];
+        if(topCard.category!=="action") return;
+        const burned=discardPile.pop(); burnPile.push(burned);
+        log("Top discard was Action Card; burned "+burned.name);
+        if(deck.length>0){ discardPile.push(deck.pop()); log("Replaced top discard from deck"); }
+    }
+}
+
+function advanceToNextPlayer(){
+
+    currentPlayerIndex=(currentPlayerIndex+1)%players.length;
+}
+
+function moveToNextAvailablePlayer(){
+
+    let checkedPlayers = 0;
+
+    while(checkedPlayers < players.length){
+
+        advanceToNextPlayer();
+
+        if(currentPlayer().effects.skip){
+
+            log(currentPlayer().name+" was skipped.");
+
+            currentPlayer().effects.skip=false;
+
+            turnsTakenThisRound++;
+
+            checkedPlayers++;
+
+            if(turnsTakenThisRound>=players.length){
+
+                return false;
+            }
+
+            continue;
+        }
+
+        return true;
+    }
+
+    return false;
+}
+
+
+function autoRevealNextStreet(){
+
+    turnsTakenThisRound=0;
+    currentPlayerIndex=0;
+    turnState="MUST_DRAW";
+    lastDrawnFromDiscardId=null;
+
+    if(phase==="PRE-FLOP"){
+
+        burnCard();
+
+        flop=[
+            drawValidCommunityCard(),
+            drawValidCommunityCard(),
+            drawValidCommunityCard()
+        ].filter(Boolean);
+
+        phase="FLOP";
+
+        ensureDiscardTopPlayable();
+
+        log("Flop automatically revealed.");
+
+        updateAll();
+
+        return;
+    }
+
+    if(phase==="FLOP"){
+
+        burnCard();
+
+        turnCard=drawValidCommunityCard();
+
+        phase="TURN";
+
+        ensureDiscardTopPlayable();
+
+        log("Turn automatically revealed.");
+
+        updateAll();
+
+        return;
+    }
+
+    if(phase==="TURN"){
+
+        burnCard();
+
+        riverCard=drawValidCommunityCard();
+
+        phase="RIVER";
+
+        ensureDiscardTopPlayable();
+
+        log("River automatically revealed.");
+
+        updateAll();
+
+        return;
+    }
+
+    if(phase==="RIVER"){
+
+        turnState="TURN_COMPLETE";
+
+        log("Final river round complete. Scoring hand automatically.");
+
+        updateAll();
+
+        showdown();
+
+        return;
+    }
+}
+
+function startNextTurn(){
+    // Button removed in v3.3.4. This remains only as a backup helper.
+    if(handOver){ alert("Hand is over. Start the next hand."); return; }
+
+    if(turnState!=="TURN_COMPLETE"){ alert("Current turn is not complete yet."); return; }
+
+    autoAdvanceAfterDiscard();
+}
+
+function autoAdvanceAfterDiscard(){
+
+    if(handOver){
+        updateAll();
+        return;
+    }
+
+    log(currentPlayer().name+" completed their turn.");
+
+    turnsTakenThisRound++;
+
+    if(turnsTakenThisRound>=players.length){
+
+        autoRevealNextStreet();
+
+        return;
+    }
+
+    const hasNextPlayer =
+        moveToNextAvailablePlayer();
+
+    if(!hasNextPlayer || turnsTakenThisRound>=players.length){
+
+        autoRevealNextStreet();
+
+        return;
+    }
+
+    turnState="MUST_DRAW";
+    lastDrawnFromDiscardId=null;
+
+    ensureDiscardTopPlayable();
+
+    handRevealed=false;
+
+    log("Pass device to "+currentPlayer().name+". Then click Reveal Hand.");
+
+    updateAll();
+}
+
+
+function drawFromDeck(){
+    if(handOver){ alert("Hand is over. Start the next hand."); return; }
+
+    if(turnState!=="MUST_DRAW"){ alert("You must discard before drawing again."); return; }
+    if(deck.length===0){ alert("Deck Empty"); return; }
+    const card=deck.pop();
+    currentPlayer().hand.push(card);
+    lastDrawnFromDiscardId=null;
+    turnState="MUST_DISCARD";
+    log(currentPlayer().name+" drew from deck");
+    updateAll();
+}
+
+function drawFromDiscard(){
+    if(handOver){ alert("Hand is over. Start the next hand."); return; }
+
+    if(turnState!=="MUST_DRAW"){ alert("You must discard before drawing again."); return; }
+    if(discardPile.length===0){ alert("Discard pile empty."); return; }
+    const topCard=discardPile[discardPile.length-1];
+    if(topCard.category==="action"){ alert("You cannot draw an Action Card from the discard pile."); return; }
+    const card=discardPile.pop();
+    currentPlayer().hand.push(card);
+    lastDrawnFromDiscardId=card.id;
+    turnState="MUST_DISCARD";
+    log(currentPlayer().name+" drew from discard: "+card.name);
+    updateAll();
+}
+
+function chooseTarget(excludeSelf=true){
+    let options=players
+        .map((p,i)=>({p,i}))
+        .filter(x=>!excludeSelf || x.i!==currentPlayerIndex)
+        .map(x=>`${x.i}: ${x.p.name}`)
+        .join("\\n");
+    let choice=prompt("Choose target by number:\\n"+options);
+    if(choice===null) return null;
+    let idx=parseInt(choice,10);
+    if(Number.isNaN(idx) || idx<0 || idx>=players.length || (excludeSelf && idx===currentPlayerIndex)){
+        alert("Invalid target.");
+        return null;
+    }
+    return idx;
+}
+
+function burnRandomCardFromPlayer(playerIndex){
+
+    const targetPlayer = players[playerIndex];
+
+    if(targetPlayer.hand.length <= 1){
+
+        log(targetPlayer.name+" has only one card and cannot be burned.");
+        return false;
+    }
+
+    const randomIndex =
+        Math.floor(Math.random() * targetPlayer.hand.length);
+
+    const burnedCard =
+        targetPlayer.hand.splice(randomIndex,1)[0];
+
+    burnPile.push(burnedCard);
+
+    log(targetPlayer.name+" burned one random card.");
+
+    return true;
+}
+
+function chooseCommunityCard(){
+
+    const availableCards = [];
+
+    flop.forEach((card,index)=>{
+        availableCards.push({
+            label:"Flop " + (index+1) + ": " + card.name,
+            area:"flop",
+            index:index
+        });
+    });
+
+    if(turnCard){
+        availableCards.push({
+            label:"Turn: " + turnCard.name,
+            area:"turn",
+            index:0
+        });
+    }
+
+    if(riverCard){
+        availableCards.push({
+            label:"River: " + riverCard.name,
+            area:"river",
+            index:0
+        });
+    }
+
+    if(availableCards.length===0){
+        alert("There are no community cards to change yet.");
+        return null;
+    }
+
+    const options =
+        availableCards
+        .map((item,index)=> index + ": " + item.label)
+        .join("\n");
+
+    const choice =
+        prompt("Choose community card to replace:\n" + options);
+
+    if(choice===null) return null;
+
+    const selectedIndex =
+        parseInt(choice,10);
+
+    if(
+        Number.isNaN(selectedIndex) ||
+        selectedIndex<0 ||
+        selectedIndex>=availableCards.length
+    ){
+        alert("Invalid community card choice.");
+        return null;
+    }
+
+    return availableCards[selectedIndex];
+}
+
+function replaceCommunityCard(selection){
+
+    const newCard =
+        drawValidCommunityCard();
+
+    if(!newCard){
+        alert("No valid replacement card available.");
+        return false;
+    }
+
+    if(selection.area==="flop"){
+
+        const oldCard =
+            flop[selection.index];
+
+        burnPile.push(oldCard);
+
+        flop[selection.index] =
+            newCard;
+
+        log("Changed community card: burned " + oldCard.name + " and replaced it with " + newCard.name + ".");
+
+        return true;
+    }
+
+    if(selection.area==="turn"){
+
+        const oldCard =
+            turnCard;
+
+        burnPile.push(oldCard);
+
+        turnCard =
+            newCard;
+
+        log("Changed Turn card: burned " + oldCard.name + " and replaced it with " + newCard.name + ".");
+
+        return true;
+    }
+
+    if(selection.area==="river"){
+
+        const oldCard =
+            riverCard;
+
+        burnPile.push(oldCard);
+
+        riverCard =
+            newCard;
+
+        log("Changed River card: burned " + oldCard.name + " and replaced it with " + newCard.name + ".");
+
+        return true;
+    }
+
+    return false;
+}
+
+function passHands(direction){
+
+    // Copy all hands and hand-based effects first so the pass happens simultaneously.
+    const originalHands =
+        players.map(p => p.hand);
+
+    const originalHandEffects =
+        players.map(p => ({
+            bonus: p.effects.bonus,
+            faceUp: p.effects.faceUp
+        }));
+
+    const count =
+        players.length;
+
+    players.forEach((player,index)=>{
+
+        let sourceIndex;
+
+        if(direction==="left"){
+
+            // Everyone passes to the left.
+            // Each player receives from the player on their right.
+            sourceIndex =
+                (index + 1) % count;
+
+        } else {
+
+            // Everyone passes to the right.
+            // Each player receives from the player on their left.
+            sourceIndex =
+                (index - 1 + count) % count;
+        }
+
+        player.hand =
+            originalHands[sourceIndex];
+
+        // Hand effects transfer with the hand.
+        player.effects.bonus =
+            originalHandEffects[sourceIndex].bonus;
+
+        player.effects.faceUp =
+            originalHandEffects[sourceIndex].faceUp;
+
+        // Player effects stay with the player.
+        // Skip does not transfer.
+    });
+
+    if(direction==="left"){
+
+        log(currentPlayer().name+" played Pass Left.");
+
+    } else {
+
+        log(currentPlayer().name+" played Pass Right.");
+    }
+
+    return true;
+}
+
+function tradeHandsWithPlayer(targetIndex){
+
+    const actingPlayer =
+        currentPlayer();
+
+    const targetPlayer =
+        players[targetIndex];
+
+    const tempHand =
+        actingPlayer.hand;
+
+    actingPlayer.hand =
+        targetPlayer.hand;
+
+    targetPlayer.hand =
+        tempHand;
+
+    // Hand effects transfer with the hand.
+    const actingHandEffects = {
+        bonus: actingPlayer.effects.bonus,
+        faceUp: actingPlayer.effects.faceUp
+    };
+
+    actingPlayer.effects.bonus =
+        targetPlayer.effects.bonus;
+
+    actingPlayer.effects.faceUp =
+        targetPlayer.effects.faceUp;
+
+    targetPlayer.effects.bonus =
+        actingHandEffects.bonus;
+
+    targetPlayer.effects.faceUp =
+        actingHandEffects.faceUp;
+
+    // Player effects stay with the player.
+    // Skip does not transfer.
+
+    log(actingPlayer.name+" traded hands with "+targetPlayer.name+".");
+
+    return true;
+}
+
+function fullResetPlayer(playerIndex){
+
+    const targetPlayer =
+        players[playerIndex];
+
+    while(targetPlayer.hand.length>0){
+
+        const burnedCard =
+            targetPlayer.hand.pop();
+
+        burnPile.push(burnedCard);
+    }
+
+    targetPlayer.effects.bonus = false;
+    targetPlayer.effects.faceUp = false;
+
+    for(let i=0;i<2;i++){
+
+        if(deck.length>0){
+
+            targetPlayer.hand.push(deck.pop());
+        }
+    }
+
+    log(targetPlayer.name+" was fully reset and drew 2 new cards.");
+
+    return true;
+}
+
+function applyBonusToPlayer(playerIndex){
+
+    if(deck.length===0){
+        alert("Deck Empty. Bonus cannot draw a card.");
+        return false;
+    }
+
+    const targetPlayer =
+        players[playerIndex];
+
+    const bonusCard =
+        deck.pop();
+
+    targetPlayer.hand.push(bonusCard);
+
+    targetPlayer.effects.bonus = true;
+
+    log(targetPlayer.name+" received a Bonus Card and drew one extra card.");
+
+    return true;
+}
+
+function resolveActionCard(card){
+    if(card.action==="peek_targeted"){
+        const idx=chooseTarget(true);
+        if(idx===null) return false;
+        alert(players[idx].name+"'s hand: "+players[idx].hand.map(c=>c.name).join(", "));
+        log(currentPlayer().name+" peeked at "+players[idx].name+"'s hand.");
+        return true;
+    }
+
+    if(card.action==="face_up_targeted"){
+        const idx=chooseTarget(true);
+        if(idx===null) return false;
+        players[idx].effects.faceUp=true;
+        log(players[idx].name+" must play face up.");
+        return true;
+    }
+
+    if(card.action==="face_up_self"){
+        currentPlayer().effects.faceUp=true;
+        log(currentPlayer().name+" must play face up.");
+        return true;
+    }
+
+    if(card.action==="skip"){
+        const idx=chooseTarget(true);
+        if(idx===null) return false;
+        players[idx].effects.skip=true;
+        log(players[idx].name+" will lose their next turn.");
+        return true;
+    }
+
+    if(card.action==="burn_targeted"){
+        const validTargets =
+            players
+            .map((p,i)=>({p,i}))
+            .filter(x=>x.i!==currentPlayerIndex && x.p.hand.length>1);
+
+        if(validTargets.length===0){
+            alert("No valid burn targets. Players must have at least 2 cards.");
+            return false;
+        }
+
+        const idx=chooseTarget(true);
+
+        if(idx===null) return false;
+
+        if(players[idx].hand.length<=1){
+            alert(players[idx].name+" only has one card and cannot be burned.");
+            return false;
+        }
+
+        burnRandomCardFromPlayer(idx);
+        return true;
+    }
+
+    if(card.action==="burn_all"){
+
+        let burnedAny=false;
+
+        players.forEach((p,i)=>{
+            if(i!==currentPlayerIndex && p.hand.length>1){
+                const result=burnRandomCardFromPlayer(i);
+                if(result) burnedAny=true;
+            }
+        });
+
+        if(!burnedAny){
+            log("Burn All was played, but no other players had enough cards to burn.");
+        } else {
+            log(currentPlayer().name+" played Burn All.");
+        }
+
+        return true;
+    }
+
+    if(card.action==="change_community"){
+
+        const selection =
+            chooseCommunityCard();
+
+        if(selection===null) return false;
+
+        return replaceCommunityCard(selection);
+    }
+
+    if(card.action==="pass_left"){
+
+        return passHands("left");
+    }
+
+    if(card.action==="pass_right"){
+
+        return passHands("right");
+    }
+
+    if(card.action==="trade_hands"){
+
+        const idx=chooseTarget(true);
+
+        if(idx===null) return false;
+
+        return tradeHandsWithPlayer(idx);
+    }
+
+    if(card.action==="full_reset_self"){
+
+        return fullResetPlayer(currentPlayerIndex);
+    }
+
+    if(card.action==="full_reset_targeted"){
+
+        const idx=chooseTarget(true);
+
+        if(idx===null) return false;
+
+        return fullResetPlayer(idx);
+    }
+
+    if(card.action==="full_reset_all"){
+
+        players.forEach((p,i)=>{
+
+            if(i!==currentPlayerIndex){
+
+                fullResetPlayer(i);
+            }
+        });
+
+        log(currentPlayer().name+" played Full Reset All.");
+
+        return true;
+    }
+
+    if(card.action==="bonus_self"){
+
+        return applyBonusToPlayer(currentPlayerIndex);
+    }
+
+    if(card.action==="bonus_targeted"){
+
+        const idx=chooseTarget(true);
+
+        if(idx===null) return false;
+
+        return applyBonusToPlayer(idx);
+    }
+
+    alert(card.name+" is not programmed yet. It will be treated as a normal discard for now.");
+    log(card.name+" effect is not implemented yet.");
+    return true;
+}
+
+function discardCard(index){
+    if(handOver){ alert("Hand is over. Start the next hand."); return; }
+
+    if(turnState!=="MUST_DISCARD"){
+        alert("You must draw before discarding.");
+        return;
+    }
+
+    const player=currentPlayer();
+    const card=player.hand[index];
+
+    if(!card){
+        alert("Card not found.");
+        updateAll();
+        return;
+    }
+
+    if(card.id===lastDrawnFromDiscardId){
+        alert("You cannot immediately discard the card you drew from the discard pile.");
+        return;
+    }
+
+    // IMPORTANT:
+    // Action cards must be removed from the acting player's hand BEFORE their effect resolves.
+    // Otherwise cards like Trade Hands / Pass Hands can move the hand first, and the game then
+    // tries to discard from the wrong hand.
+    const discarded=player.hand.splice(index,1)[0];
+
+    if(discarded.category==="action"){
+
+        const resolved=resolveActionCard(discarded);
+
+        if(!resolved){
+            // If the player cancels target selection or the effect cannot resolve,
+            // put the Action Card back where it came from.
+            player.hand.splice(index,0,discarded);
+            updateAll();
+            return;
+        }
+
+        discardPile.push(discarded);
+
+        log(player.name+" played Action Card: "+discarded.name+" ("+discarded.target+")");
+
+    } else {
+
+        discardPile.push(discarded);
+
+        log(player.name+" discarded "+discarded.name);
+    }
+
+    turnState="TURN_COMPLETE";
+    lastDrawnFromDiscardId=null;
+
+    // Automatically move to the next player's turn after a discard/action card.
+    autoAdvanceAfterDiscard();
+}
+
+function burnCard(){ if(deck.length===0) return; burnPile.push(deck.pop()); log("Burned one card before street"); }
+
+function drawValidCommunityCard(){
+    while(deck.length>0){
+        const card=deck.pop();
+        if(card.category==="action" || card.category==="wild"){ burnPile.push(card); log("Invalid community card burned: "+card.name); continue; }
+        return card;
+    }
+    return null;
+}
+
+function revealFlop(){
+    if(handOver){ alert("Hand is over. Start the next hand."); return; }
+
+    if(phase!=="PRE-FLOP" || turnState!=="MUST_DRAW") return;
+    burnCard();
+    flop=[drawValidCommunityCard(),drawValidCommunityCard(),drawValidCommunityCard()].filter(Boolean);
+    phase="FLOP"; turnState="MUST_DRAW"; lastDrawnFromDiscardId=null; currentPlayerIndex=0;
+    ensureDiscardTopPlayable();
+    log("Flop revealed");
+    updateAll();
+}
+
+function revealTurn(){
+    if(handOver){ alert("Hand is over. Start the next hand."); return; }
+
+    if(phase!=="FLOP" || turnState!=="MUST_DRAW") return;
+    burnCard(); turnCard=drawValidCommunityCard();
+    phase="TURN"; turnState="MUST_DRAW"; lastDrawnFromDiscardId=null; currentPlayerIndex=0;
+    ensureDiscardTopPlayable();
+    log("Turn revealed");
+    updateAll();
+}
+
+function revealRiver(){
+    if(handOver){ alert("Hand is over. Start the next hand."); return; }
+
+    if(phase!=="TURN" || turnState!=="MUST_DRAW") return;
+    burnCard(); riverCard=drawValidCommunityCard();
+    phase="RIVER"; turnState="MUST_DRAW"; lastDrawnFromDiscardId=null; currentPlayerIndex=0;
+    ensureDiscardTopPlayable();
+    log("River revealed");
+    updateAll();
+}
+
+function cardHtml(card,clickAction=""){
+
+    const clickableClass =
+        clickAction ? "clickable" : "";
+
+    if(card.category==="standard"){
+
+        const suit =
+            card.name.slice(-1);
+
+        const rank =
+            card.name.slice(0,-1);
+
+        const isRed =
+            suit==="♥" || suit==="♦";
+
+        return `
+            <div
+                class="card pokerCard ${isRed ? "redCard" : "blackCard"} ${clickableClass}"
+                ${clickAction}
+            >
+                <div class="cardCorner topLeft">
+                    ${rank}<br>${suit}
+                </div>
+
+                <div class="centerSuit">
+                    ${suit}
+                </div>
+
+                <div class="cardCorner bottomRight">
+                    ${rank}<br>${suit}
+                </div>
+            </div>
+        `;
+    }
+
+    if(card.category==="wild"){
+
+        let suitDisplay = "♠ ♥<br>♦ ♣";
+
+        if(card.wildSuit){
+            suitDisplay = `${card.wildSuit}<br>${card.wildSuit}`;
+        }
+
+        return `
+            <div class="card wildFace ${clickableClass}" ${clickAction}>
+                <div style="font-size:22px;">WILD</div>
+                <div class="wildSuitGrid">${suitDisplay}</div>
+                <div style="transform:rotate(180deg);font-size:22px;">WILD</div>
+            </div>
+        `;
+    }
+
+    if(card.category==="action"){
+
+        const colorMap = {
+            skip:"#075985",
+            bonus:"#15803d",
+            burn:"#dc0000",
+            reset:"#e66a00",
+            info:"#6d3279",
+            swap:"#f2b600"
+        };
+
+        const iconMap = {
+            skip:"⊘",
+            bonus:"+",
+            burn:"🔥",
+            reset:"↻",
+            info:"1",
+            swap:"⇄"
+        };
+
+        const targetIcon = {
+            targeted:"🎯",
+            self:"👤",
+            all:"👥"
+        };
+
+        const title =
+            card.name
+                .replace("Change Community","COMM CARD")
+                .replace("Trade Hands","TRADE HANDS")
+                .replace("Full Reset","FULL RESET")
+                .replace("Face Up","FACE UP")
+                .replace("Bonus","BONUS CARD")
+                .replace("Burn","BURN")
+                .replace("Skip","SKIP")
+                .replace("Peek","PEEK");
+
+        const textColor =
+            card.color==="swap" ? "#111" : "white";
+
+        return `
+            <div
+                class="card actionFace ${clickableClass}"
+                ${clickAction}
+                style="background:${colorMap[card.color] || "#444"}; color:${textColor}; position:relative;"
+            >
+                <div class="targetBadge">
+                    ${targetIcon[card.target] || ""}
+                </div>
+
+                <div class="actionIcon">
+                    ${iconMap[card.color] || "★"}
+                </div>
+
+                <div class="actionTitle">
+                    ${title}
+                </div>
+
+                <div class="actionPenalty">
+                    ${card.penalty}
+                </div>
+            </div>
+        `;
+    }
+
+    return "";
+}
+
+function renderScoreboard(){
+
+    let html="<table><tr><th>Player</th><th>Score</th></tr>";
+
+    players.forEach((player,index)=>{
+        html += `
+            <tr>
+                <td>${player.name}</td>
+                <td><strong>${gameScores[index] || 0}</strong></td>
+            </tr>
+        `;
+    });
+
+    html+="</table>";
+
+    document.getElementById("scoreboard").innerHTML=html;
+}
+
+
+function hiddenHandHtml(player){
+
+    let cards = "";
+
+    for(let i=0;i<player.hand.length;i++){
+
+        cards += `
+            <div class="card cardBack">
+                <div class="backLogo">
+                    <div class="backAction">ACTION</div>
+                    <div class="backHoldem">HOLD 'EM</div>
+                    <div class="cornerClub">♣</div><div class="cornerHeart">♥</div>
+                </div>
+            </div>
+        `;
+    }
+
+    return cards;
+}
+
+function renderPlayers(){
+    let html="";
+
+    players.forEach((p,i)=>{
+        const isCurrent=i===currentPlayerIndex;
+
+        const effectHtml=[
+            p.effects.skip ? "<span class='effect'>Skip Pending</span>" : "",
+            p.effects.faceUp ? "<span class='effect'>Face Up</span>" : "",
+            p.effects.bonus ? "<span class='effect'>Bonus</span>" : ""
+        ].join("");
+
+        let cards="";
+
+        if(p.effects.faceUp || handOver){
+            cards=p.hand.map(c=>cardHtml(c)).join("");
+        }else{
+            cards=hiddenHandHtml(p);
+        }
+
+        html+=`
+            <div class="playerBox ${isCurrent ? "currentPlayer" : ""}">
+                <strong>${isCurrent ? "▶ " : ""}${p.name}</strong>
+                <br>
+                ${effectHtml}
+                <br>
+                ${cards}
+            </div>
+        `;
+    });
+
+    document.getElementById("players").innerHTML=html;
+}
+
+
+
+
+function renderHand(){
+
+    const revealArea =
+        document.getElementById("revealHandArea");
+
+    const player =
+        currentPlayer();
+
+    if(!handRevealed && !handOver){
+
+        revealArea.innerHTML = `
+            <div class="passScreen">
+                <div>Pass Device To</div>
+
+                <div class="passPlayer">
+                    ${player.name}
+                </div>
+
+                <button onclick="revealCurrentHand()">
+                    Reveal Hand
+                </button>
+            </div>
+        `;
+
+        document.getElementById("hand").innerHTML = "";
+
+        return;
+    }
+
+    revealArea.innerHTML = "";
+
+    document.getElementById("hand").innerHTML =
+        player.hand.map((c,i)=>
+            cardHtml(
+                c,
+                turnState==="MUST_DISCARD"
+                    ? `onclick="discardCard(${i})"`
+                    : ""
+            )
+        ).join("");
+}
+
+
+function renderDiscard(){
+    if(discardPile.length===0){ document.getElementById("discard").innerHTML="Empty"; return; }
+    const card=discardPile[discardPile.length-1];
+    const canClick=!handOver && turnState==="MUST_DRAW" && card.category!=="action";
+    document.getElementById("discard").innerHTML=cardHtml(card, canClick ? `onclick="drawFromDiscard()"` : "");
+}
+
+function renderBoard(){
+    document.getElementById("flop").innerHTML=flop.map(card=>cardHtml(card)).join("");
+    document.getElementById("turn").innerHTML=turnCard ? cardHtml(turnCard) : "";
+    document.getElementById("river").innerHTML=riverCard ? cardHtml(riverCard) : "";
+}
+
+
+function parseStandardCard(card){
+    const name = card.name;
+    const suit = name.slice(-1);
+    const rankText = name.slice(0,-1);
+    const rankMap = {"2":2,"3":3,"4":4,"5":5,"6":6,"7":7,"8":8,"9":9,"10":10,"J":11,"Q":12,"K":13,"A":14};
+    return {
+        rank: rankMap[rankText],
+        suit: suit,
+        name: name
+    };
+}
+
+function getAllStandardCardPossibilities(){
+    const suits=["♠","♥","♦","♣"];
+    const ranks=[
+        {t:"2",v:2},{t:"3",v:3},{t:"4",v:4},{t:"5",v:5},{t:"6",v:6},{t:"7",v:7},
+        {t:"8",v:8},{t:"9",v:9},{t:"10",v:10},{t:"J",v:11},{t:"Q",v:12},{t:"K",v:13},{t:"A",v:14}
+    ];
+
+    const cards=[];
+    for(const suit of suits){
+        for(const rank of ranks){
+            cards.push({rank:rank.v,suit:suit,name:rank.t+suit});
+        }
+    }
+    return cards;
+}
+
+function combinations(array, size){
+    const result=[];
+    function backtrack(start, combo){
+        if(combo.length===size){
+            result.push([...combo]);
+            return;
+        }
+        for(let i=start;i<array.length;i++){
+            combo.push(array[i]);
+            backtrack(i+1, combo);
+            combo.pop();
+        }
+    }
+    backtrack(0, []);
+    return result;
+}
+
+function compareRankArrays(a,b){
+    const len=Math.max(a.length,b.length);
+    for(let i=0;i<len;i++){
+        const av=a[i] || 0;
+        const bv=b[i] || 0;
+        if(av!==bv) return av-bv;
+    }
+    return 0;
+}
+
+function compareEvaluations(a,b){
+    if(!b) return 1;
+    if(a.points!==b.points) return a.points-b.points;
+    return compareRankArrays(a.tie,b.tie);
+}
+
+function straightHighFromRanks(ranks){
+    const unique=[...new Set(ranks)].sort((a,b)=>a-b);
+
+    if(unique.includes(14)){
+        unique.unshift(1);
+    }
+
+    let best=0;
+    for(let i=0;i<=unique.length-5;i++){
+        const run=unique.slice(i,i+5);
+        if(run[4]-run[0]===4 && new Set(run).size===5){
+            best=Math.max(best, run[4]===1 ? 5 : run[4]);
+        }
+    }
+    return best;
+}
+
+function evaluateConcreteFive(cards, usedWild){
+    const ranks=cards.map(c=>c.rank).sort((a,b)=>b-a);
+    const suits=cards.map(c=>c.suit);
+    const flush=suits.every(s=>s===suits[0]);
+    const straightHigh=straightHighFromRanks(ranks);
+
+    const counts={};
+    ranks.forEach(r=>counts[r]=(counts[r]||0)+1);
+
+    const groups=Object.keys(counts)
+        .map(r=>({rank:parseInt(r), count:counts[r]}))
+        .sort((a,b)=>{
+            if(b.count!==a.count) return b.count-a.count;
+            return b.rank-a.rank;
+        });
+
+    const isRoyal =
+        flush &&
+        straightHigh===14 &&
+        [10,11,12,13,14].every(r=>ranks.includes(r));
+
+    const natural = !usedWild;
+
+    if(isRoyal){
+        return {
+            label:natural ? "Natural Royal Flush" : "Royal Flush",
+            points:natural ? 500 : 350,
+            tie:[14]
+        };
+    }
+
+    if(flush && straightHigh){
+        return {
+            label:natural ? "Natural Straight Flush" : "Straight Flush",
+            points:natural ? 300 : 225,
+            tie:[straightHigh]
+        };
+    }
+
+    if(groups[0].count===4){
+        const fourRank=groups[0].rank;
+        const kicker=groups.find(g=>g.count===1)?.rank || 0;
+        return {
+            label:natural ? "Natural Four of a Kind" : "Four of a Kind",
+            points:natural ? 200 : 150,
+            tie:[fourRank,kicker]
+        };
+    }
+
+    if(groups[0].count===3 && groups[1] && groups[1].count===2){
+        return {
+            label:"Full House",
+            points:125,
+            tie:[groups[0].rank, groups[1].rank]
+        };
+    }
+
+    if(flush){
+        return {
+            label:"Flush",
+            points:100,
+            tie:ranks
+        };
+    }
+
+    if(straightHigh){
+        return {
+            label:"Straight",
+            points:80,
+            tie:[straightHigh]
+        };
+    }
+
+    if(groups[0].count===3){
+        const kickers=groups.filter(g=>g.count===1).map(g=>g.rank).sort((a,b)=>b-a);
+        return {
+            label:"Three of a Kind",
+            points:40,
+            tie:[groups[0].rank,...kickers]
+        };
+    }
+
+    if(groups[0].count===2 && groups[1] && groups[1].count===2){
+        const pairs=groups.filter(g=>g.count===2).map(g=>g.rank).sort((a,b)=>b-a);
+        const kicker=groups.find(g=>g.count===1)?.rank || 0;
+        return {
+            label:"Two Pair",
+            points:30,
+            tie:[...pairs,kicker]
+        };
+    }
+
+    if(groups[0].count===2){
+        const pair=groups[0].rank;
+        const kickers=groups.filter(g=>g.count===1).map(g=>g.rank).sort((a,b)=>b-a);
+        return {
+            label:"One Pair",
+            points:-25,
+            tie:[pair,...kickers]
+        };
+    }
+
+    return {
+        label:"High Card",
+        points:-50,
+        tie:ranks
+    };
+}
+
+function expandAndEvaluateFive(combo){
+    const wilds=combo.filter(c=>c.category==="wild");
+    const naturals=combo.filter(c=>c.category!=="wild").map(parseStandardCard);
+
+    if(wilds.length===4){
+        return {
+            label:"Four of a Kind (All Wild Cards)",
+            points:200,
+            tie:[14]
+        };
+    }
+
+    if(wilds.length===0){
+        return evaluateConcreteFive(naturals, false);
+    }
+
+    if(wilds.length>3){
+        return null;
+    }
+
+    const allCards=getAllStandardCardPossibilities();
+    const usedNames=new Set(naturals.map(c=>c.name));
+    let best=null;
+
+    function recurse(wildIndex, assigned){
+        if(wildIndex===wilds.length){
+            const evalResult=evaluateConcreteFive([...naturals,...assigned], true);
+            if(compareEvaluations(evalResult,best)>0){
+                best=evalResult;
+            }
+            return;
+        }
+
+        const wild=wilds[wildIndex];
+
+        for(const possible of allCards){
+            if(usedNames.has(possible.name)) continue;
+
+            if(wild.wildSuit && wild.wildSuit!==possible.suit) continue;
+
+            usedNames.add(possible.name);
+            assigned.push(possible);
+            recurse(wildIndex+1, assigned);
+            assigned.pop();
+            usedNames.delete(possible.name);
+        }
+    }
+
+    recurse(0,[]);
+    return best;
+}
+
+function evaluatePlayerBestHand(player){
+    const available=[
+        ...player.hand,
+        ...flop,
+        ...(turnCard ? [turnCard] : []),
+        ...(riverCard ? [riverCard] : [])
+    ];
+
+    const fiveCardCombos=combinations(available,5);
+    let best=null;
+
+    for(const combo of fiveCardCombos){
+        const evalResult=expandAndEvaluateFive(combo);
+        if(evalResult && compareEvaluations(evalResult,best)>0){
+            best=evalResult;
+        }
+    }
+
+    if(!best){
+        return {
+            label:"No Valid Hand",
+            points:0,
+            tie:[]
+        };
+    }
+
+    return best;
+}
+
+function actionPenaltyForPlayer(player){
+    return player.hand
+        .filter(card=>card.category==="action")
+        .reduce((sum,card)=>sum+card.penalty,0);
+}
+
+function showdown(){
+    log("Showdown function started.");
+
+    if(phase!=="RIVER"){
+        alert("Reveal the river before showdown.");
+        return;
+    }
+
+    if(handAlreadyScored){
+        alert("This hand has already been scored. Start a new hand.");
+        return;
+    }
+
+    const expertToggle =
+        document.getElementById("expertModeToggle");
+
+    const expertMode =
+        expertToggle ? expertToggle.checked : false;
+
+    const results=players.map((player, playerIndex)=>{
+        const handEval=evaluatePlayerBestHand(player);
+        const penalty=actionPenaltyForPlayer(player);
+        return {
+            player:player,
+            playerIndex:playerIndex,
+            handEval:handEval,
+            penalty:penalty,
+            bestBonus:0,
+            handPoints:handEval.points,
+            total:handEval.points + penalty
+        };
+    });
+
+    let bestResult=null;
+    results.forEach(result=>{
+        if(compareEvaluations(result.handEval, bestResult ? bestResult.handEval : null)>0){
+            bestResult=result;
+        }
+    });
+
+    const tiedBest=results.filter(result=>compareEvaluations(result.handEval,bestResult.handEval)===0);
+
+    if(expertMode){
+
+        results.forEach(result=>{
+            result.handPoints=0;
+            result.bestBonus=0;
+            result.total=result.penalty;
+        });
+
+        const splitPoints =
+            bestResult.handEval.points / tiedBest.length;
+
+        tiedBest.forEach(result=>{
+            result.handPoints=splitPoints;
+            result.total=splitPoints + result.penalty;
+        });
+
+        log("Expert Mode scoring applied.");
+
+    } else {
+
+        if(tiedBest.length<4){
+            const bonus=30/tiedBest.length;
+            tiedBest.forEach(result=>{
+                result.bestBonus=bonus;
+                result.total+=bonus;
+            });
+        }
+    }
+
+    results.forEach(result=>{
+        gameScores[result.playerIndex] += result.total;
+    });
+
+    handAlreadyScored=true;
+    handOver=true;
+
+    let winnerMessage="";
+
+    const playersAtTarget =
+        gameScores.filter(score=>score>=targetScore).length;
+
+    if(playersAtTarget>0 && !finalHandTriggered){
+
+        finalHandTriggered=true;
+
+        winnerMessage =
+            "<p><strong>⚠ FINAL HAND ACTIVE</strong><br>A player has reached the target score. Finish this hand to determine the winner.</p>";
+
+        log("Final hand triggered.");
+    }
+
+    else if(finalHandTriggered){
+
+        const standings =
+            gameScores
+                .map((score,index)=>({score,index}))
+                .sort((a,b)=>b.score-a.score);
+
+        const winningScore =
+            standings[0].score;
+
+        const winners =
+            standings.filter(x=>x.score===winningScore);
+
+        winnerMessage =
+            "<h2>🏆 GAME OVER</h2>" +
+            "<h3>" +
+            winners.map(w=>players[w.index].name).join(", ") +
+            "</h3>" +
+            "<p>" + winningScore + " Points</p>" +
+            "<h3>Final Standings</h3><ol>" +
+            standings.map(s=>
+                "<li>" +
+                players[s.index].name +
+                " — " +
+                s.score +
+                "</li>"
+            ).join("") +
+            "</ol>";
+
+        handOver=true;
+    }
+
+    const modeLabel =
+        expertMode ? "Expert Mode — Winner Takes Points" : "Standard Mode";
+
+    let html=winnerMessage + "<p><strong>Scoring Mode: " + modeLabel + "</strong></p>" +
+        "<table><tr><th>Player</th><th>Best Hand</th><th>Hand Points</th><th>Best Hand Bonus</th><th>Action Penalties</th><th>Hand Total</th><th>Game Score</th></tr>";
+
+    results.forEach(result=>{
+        html+=`
+            <tr>
+                <td>${result.player.name}</td>
+                <td>${result.handEval.label}</td>
+                <td>${result.handPoints}</td>
+                <td>${result.bestBonus}</td>
+                <td>${result.penalty}</td>
+                <td><strong>${result.total}</strong></td>
+                <td><strong>${gameScores[result.playerIndex]}</strong></td>
+            </tr>
+        `;
+    });
+
+    html+="</table>";
+
+    document.getElementById("results").innerHTML=html;
+
+    players.forEach(player=>player.effects.faceUp=true);
+
+    log("Showdown scored. Results table updated.");
+    updateAll();
+}
+
+
+function updateButtons(){
+
+    document.getElementById("drawBtn").disabled =
+        handOver || turnState!=="MUST_DRAW";
+
+    const topDiscard =
+        discardPile.length ? discardPile[discardPile.length-1] : null;
+
+    document.getElementById("drawDiscardBtn").disabled =
+        handOver ||
+        turnState!=="MUST_DRAW" ||
+        !topDiscard ||
+        topDiscard.category==="action";
+}
+
+function updateAll(){
+    renderScoreboard();
+    renderPlayers();
+    renderHand();
+    renderDiscard();
+    renderBoard();
+    updateButtons();
+    document.getElementById("phase").innerText=phase;
+    document.getElementById("turnState").innerText=handOver ? "HAND OVER — Start Next Hand" : turnState+" — "+currentPlayer().name;
+    document.getElementById("deckCount").innerText=deck.length+" cards";
+    document.getElementById("burnCount").innerText=burnPile.length+" cards";
+}
+
+startNewHand();
+</script>
+</body>
+</html>
