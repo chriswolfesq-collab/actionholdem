@@ -779,7 +779,16 @@ Target:
 </div>
 
 
+
+<div id="mvpModal" class="gameOverModal">
+  <div class="gameOverContent" style="max-width:500px;">
+    <h1>🏆 BEST HAND</h1>
+    <div id="mvpBody"></div>
+  </div>
+</div>
+
 <div id="targetModal" class="targetModal">
+
  <div class="targetContent">
    <h2>🎯 Choose Target</h2>
    <div id="targetButtons"></div>
@@ -2314,7 +2323,7 @@ function evaluateConcreteFive(cards, usedWild){
             label:natural ? "Natural Straight Flush" : "Straight Flush",
             points:natural ? 300 : 225,
             tie:[straightHigh],
-            cardsUsed: cards.map(c=>c.name)
+            cardsUsed: combo.map(c=>c.name)
         };
     }
 
@@ -2325,7 +2334,7 @@ function evaluateConcreteFive(cards, usedWild){
             label:natural ? "Natural Four of a Kind" : "Four of a Kind",
             points:natural ? 200 : 150,
             tie:[fourRank,kicker],
-            cardsUsed: cards.map(c=>c.name)
+            cardsUsed: combo.map(c=>c.name)
         };
     }
 
@@ -2334,7 +2343,7 @@ function evaluateConcreteFive(cards, usedWild){
             label:"Full House",
             points:125,
             tie:[groups[0].rank, groups[1].rank],
-            cardsUsed: cards.map(c=>c.name)
+            cardsUsed: combo.map(c=>c.name)
         };
     }
 
@@ -2343,7 +2352,7 @@ function evaluateConcreteFive(cards, usedWild){
             label:"Flush",
             points:100,
             tie:ranks,
-            cardsUsed: cards.map(c=>c.name)
+            cardsUsed: combo.map(c=>c.name)
         };
     }
 
@@ -2352,7 +2361,7 @@ function evaluateConcreteFive(cards, usedWild){
             label:"Straight",
             points:80,
             tie:[straightHigh],
-            cardsUsed: cards.map(c=>c.name)
+            cardsUsed: combo.map(c=>c.name)
         };
     }
 
@@ -2362,7 +2371,7 @@ function evaluateConcreteFive(cards, usedWild){
             label:"Three of a Kind",
             points:40,
             tie:[groups[0].rank,...kickers],
-            cardsUsed: cards.map(c=>c.name)
+            cardsUsed: combo.map(c=>c.name)
         };
     }
 
@@ -2373,7 +2382,7 @@ function evaluateConcreteFive(cards, usedWild){
             label:"Two Pair",
             points:30,
             tie:[...pairs,kicker],
-            cardsUsed: cards.map(c=>c.name)
+            cardsUsed: combo.map(c=>c.name)
         };
     }
 
@@ -2384,7 +2393,7 @@ function evaluateConcreteFive(cards, usedWild){
             label:"One Pair",
             points:-25,
             tie:[pair,...kickers],
-            cardsUsed: cards.map(c=>c.name)
+            cardsUsed: combo.map(c=>c.name)
         };
     }
 
@@ -2404,7 +2413,7 @@ function expandAndEvaluateFive(combo){
             label:"Four of a Kind (All Wild Cards)",
             points:200,
             tie:[14],
-            cardsUsed: cards.map(c=>c.name)
+            cardsUsed: combo.map(c=>c.name)
         };
     }
 
@@ -2485,6 +2494,21 @@ function actionPenaltyForPlayer(player){
         .reduce((sum,card)=>sum+card.penalty,0);
 }
 
+
+function showMVPModal(title, hand, points){
+    const body=document.getElementById("mvpBody");
+    body.innerHTML=`
+        <h2>${title}</h2>
+        <h3 style="color:#d4af37;">${hand}</h3>
+        <h2>${points} Points</h2>
+    `;
+    document.getElementById("mvpModal").style.display="block";
+    setTimeout(()=>{
+        document.getElementById("mvpModal").style.display="none";
+    },2500);
+}
+
+
 function showdown(){
     log("Showdown function started.");
 
@@ -2527,7 +2551,17 @@ function showdown(){
 
     const tiedBest=results.filter(result=>compareEvaluations(result.handEval,bestResult.handEval)===0);
 
+    results.forEach(result=>{
+        result.isBestHandWinner = tiedBest.some(
+            winner => winner.playerIndex === result.playerIndex
+        );
+    });
+
+    const mvpNames=tiedBest.map(r=>r.player.name).join(", ");
+    showMVPModal(mvpNames,bestResult.handEval.label,bestResult.handEval.points);
+
     if(expertMode){
+
 
         results.forEach(result=>{
             result.handPoints=0;
