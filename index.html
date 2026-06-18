@@ -234,24 +234,17 @@ table{border-collapse:collapse;width:100%;}
 th,td{border:1px solid #ccc;padding:7px;text-align:left;}
 .smallNote{font-size:13px;opacity:.9;}
 .passScreen{
-    background:rgba(0,0,0,.55);
-    border:3px solid #ffd54f;
-    border-radius:18px;
-    padding:30px;
+    background:rgba(0,0,0,.35);
+    border:2px solid rgba(255,255,255,.35);
+    border-radius:14px;
+    padding:20px;
     margin:10px 0;
     text-align:center;
-    box-shadow:0 0 20px rgba(255,213,79,.35);
 }
 .passPlayer{
-    font-size:42px;
-    font-weight:900;
-    color:#ffd54f;
-    margin:20px 0;
-}
-.phaseBanner{
-    font-size:22px;
+    font-size:28px;
     font-weight:bold;
-    margin:10px 0;
+    margin:15px 0;
 }
 
 /* v5.3 card visual upgrade */
@@ -521,11 +514,6 @@ th,td{border:1px solid #ccc;padding:7px;text-align:left;}
  margin:8px 0;
 }
 
-
-.finalHandBanner{
-background:#c62828;color:white;max-width:700px;margin:12px auto;padding:12px;
-border-radius:12px;font-weight:bold;display:none;
-}
 </style>
 </head>
 <body>
@@ -581,7 +569,6 @@ Target:
 
 
 <div class="section"><h3>Scoreboard</h3><div id="scoreboard"></div></div>
-<div id="finalHandBanner" class="finalHandBanner">⚠ FINAL HAND ACTIVE<br>This is the final hand. Highest score wins.</div>
 
 <div class="statusBar">
   <div class="statusBox"><strong>Current Phase</strong><div id="phase"></div></div>
@@ -652,6 +639,17 @@ Target:
         <div class="smallNote">During MUST DISCARD, click a card to discard it or play it as an Action Card.</div>
 
         <div id="revealHandArea" style="margin-bottom:10px;"></div>
+
+        <div id="handPreview" style="
+            background:rgba(255,255,255,.15);
+            border:1px solid rgba(255,255,255,.35);
+            border-radius:12px;
+            padding:12px;
+            margin-bottom:12px;
+            font-size:16px;
+            font-weight:bold;
+            display:none;
+        "></div>
 
         <div id="hand"></div>
     </div>
@@ -1961,6 +1959,104 @@ function renderPlayers(){
 
 
 
+
+
+function renderHandPreview(){
+
+    const preview =
+        document.getElementById("handPreview");
+
+    if(!preview) return;
+
+    if(!handRevealed || handOver){
+        preview.style.display = "none";
+        preview.innerHTML = "";
+        return;
+    }
+
+    const player = currentPlayer();
+
+    const available=[
+        ...player.hand,
+        ...flop,
+        ...(turnCard ? [turnCard] : []),
+        ...(riverCard ? [riverCard] : [])
+    ];
+
+    let label="High Card";
+    let points=-50;
+
+    const rankMap={"2":2,"3":3,"4":4,"5":5,"6":6,"7":7,"8":8,"9":9,"10":10,"J":11,"Q":12,"K":13,"A":14};
+
+    const standardCards=available.filter(c=>c.category==="standard");
+
+    if(available.length >= 5){
+
+        const result=evaluatePlayerBestHand(player);
+
+        label=result.label;
+        points=result.points;
+
+    } else if(standardCards.length){
+
+        const ranks=standardCards.map(card=>{
+            const rankText=card.name.slice(0,-1);
+            return rankMap[rankText];
+        });
+
+        const counts={};
+
+        ranks.forEach(r=>{
+            counts[r]=(counts[r]||0)+1;
+        });
+
+        const pairRank=Object.keys(counts).find(r=>counts[r] >= 2);
+
+        if(pairRank){
+
+            const rankNames={
+                "11":"Jacks",
+                "12":"Queens",
+                "13":"Kings",
+                "14":"Aces"
+            };
+
+            label="Pair of " + (rankNames[pairRank] || (pairRank + "s"));
+            points=-25;
+
+        } else {
+
+            const high=Math.max(...ranks);
+
+            const highNames={
+                11:"Jack High",
+                12:"Queen High",
+                13:"King High",
+                14:"Ace High"
+            };
+
+            label=highNames[high] || (high + " High");
+            points=-50;
+        }
+    }
+
+    preview.style.display = "block";
+
+    preview.innerHTML = `
+        <div style="font-size:14px;opacity:.85;">
+            Current Best Hand
+        </div>
+
+        <div style="font-size:22px;margin-top:4px;color:#ffd54f;font-weight:900;">
+            ${label}
+        </div>
+
+        <div style="font-size:18px;margin-top:4px;">
+            ${points} Points
+        </div>
+    `;
+}
+
 function renderHand(){
 
     const revealArea =
@@ -1973,20 +2069,10 @@ function renderHand(){
 
         revealArea.innerHTML = `
             <div class="passScreen">
+                <div>Pass Device To</div>
 
                 <div class="passPlayer">
                     ${player.name}
-                </div>
-
-                <div class="phaseBanner">
-                    ${phase}
-                </div>
-
-                <div style="margin:15px 0;font-size:18px;">
-                    ${phase==="PRE-FLOP" ? "Draw a card to begin your turn." :
-                      phase==="FLOP" ? "Three community cards are now in play." :
-                      phase==="TURN" ? "One additional community card has been revealed." :
-                      "Final round before showdown."}
                 </div>
 
                 <button onclick="revealCurrentHand()">
@@ -1996,6 +2082,11 @@ function renderHand(){
         `;
 
         document.getElementById("hand").innerHTML = "";
+        const preview = document.getElementById("handPreview");
+        if(preview){
+            preview.style.display = "none";
+            preview.innerHTML = "";
+        }
 
         return;
     }
@@ -2287,7 +2378,7 @@ function evaluatePlayerBestHand(player){
 
     if(!best){
         return {
-            label:"No Valid Hand",
+            label:"Waiting For Community Cards",
             points:0,
             tie:[]
         };
@@ -2447,8 +2538,12 @@ function showdown(){
         "<table><tr><th>Player</th><th>Best Hand</th><th>Hand Points</th><th>Best Hand Bonus</th><th>Action Penalties</th><th>Hand Total</th><th>Game Score</th></tr>";
 
     results.forEach(result=>{
+
+        const isWinningHand =
+            tiedBest.includes(result);
+
         html+=`
-            <tr style="${tiedBest.includes(result)?'background:#ffd54f;color:black;font-weight:bold;':''}">
+            <tr style="${isWinningHand ? 'background:linear-gradient(#ffe082,#ffd54f);color:black;font-weight:bold;' : ''}">
                 <td>${result.player.name}</td>
                 <td>${result.handEval.label}</td>
                 <td>${result.handPoints}</td>
@@ -2505,6 +2600,7 @@ function updateAll(){
     renderStats();
     renderPlayers();
     renderHand();
+    renderHandPreview();
     renderDiscard();
     renderBoard();
     updateButtons();
@@ -2512,7 +2608,6 @@ function updateAll(){
     document.getElementById("turnState").innerText=handOver ? "HAND OVER — Start Next Hand" : turnState+" — "+currentPlayer().name;
     document.getElementById("deckCount").innerText=deck.length+" cards";
     document.getElementById("burnCount").innerText=burnPile.length+" cards";
-const banner=document.getElementById("finalHandBanner"); if(banner){banner.style.display=finalHandTriggered?"block":"none";}
 }
 
 startNewHand();
