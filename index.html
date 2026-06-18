@@ -437,8 +437,42 @@ th,td{border:1px solid #ccc;padding:7px;text-align:left;}
     color:white;
 }
 .pageLogo .logoSuits{
-    font-size:22px;
-    letter-spacing:8px;
+    font-size:28px;
+    letter-spacing:12px;
+    margin-top:4px;
+    font-weight:bold;
+}
+
+.redSuit{
+    color:#e53935;
+}
+
+.blueSuit{
+    color:#1e88e5;
+}
+}
+
+
+.handCompleteModal{
+ display:none;
+ position:fixed;
+ inset:0;
+ background:rgba(0,0,0,.8);
+ z-index:10000;
+}
+.handCompleteContent{
+ background:white;
+ color:black;
+ max-width:500px;
+ margin:120px auto;
+ padding:30px;
+ border-radius:16px;
+ text-align:center;
+ animation:popIn .35s ease;
+}
+@keyframes popIn{
+ from{transform:scale(.8);opacity:0;}
+ to{transform:scale(1);opacity:1;}
 }
 
 </style>
@@ -448,7 +482,13 @@ th,td{border:1px solid #ccc;padding:7px;text-align:left;}
     <div class="pageLogo">
         <div class="logoAction">ACTION</div>
         <div class="logoHoldem">HOLD 'EM</div>
-        <div class="logoSuits">♥ ♣ ♦ ♠</div>
+        <div class="logoSuits">
+    <span class="redSuit">♦</span>
+    <span class="blueSuit">♠</span>
+    <span class="redSuit">♥</span>
+    <span class="blueSuit">♣</span>
+    
+</div>
     </div>
     
 <div class="panel" style="max-width:700px;margin:10px auto;">
@@ -619,6 +659,15 @@ Target:
   </div>
 </div>
 
+
+<div id="handCompleteModal" class="handCompleteModal">
+  <div class="handCompleteContent">
+    <h1>🏆 HAND COMPLETE</h1>
+    <p>This hand has ended and is now being scored.</p>
+    <button onclick="closeHandCompleteModal()">View Results</button>
+  </div>
+</div>
+
 <script>
 let deck=[];
 let players=[];
@@ -663,6 +712,14 @@ function toggleSettings(){
         content.style.display='none';
         btn.textContent='⚙ Settings';
     }
+}
+
+
+function showHandCompleteModal(){
+ document.getElementById('handCompleteModal').style.display='block';
+}
+function closeHandCompleteModal(){
+ document.getElementById('handCompleteModal').style.display='none';
 }
 
 function openRules(){
@@ -2280,6 +2337,7 @@ function showdown(){
     html+="</table>";
 
     document.getElementById("results").innerHTML=html;
+    showHandCompleteModal();
 
     players.forEach(player=>player.effects.faceUp=true);
 
