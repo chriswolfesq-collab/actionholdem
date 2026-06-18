@@ -523,17 +523,9 @@ th,td{border:1px solid #ccc;padding:7px;text-align:left;}
 
 
 .finalHandBanner{
-    background:#c62828;
-    color:white;
-    max-width:700px;
-    margin:12px auto;
-    padding:12px;
-    border-radius:12px;
-    font-weight:bold;
-    display:none;
-    box-shadow:0 0 12px rgba(0,0,0,.4);
+background:#c62828;color:white;max-width:700px;margin:12px auto;padding:12px;
+border-radius:12px;font-weight:bold;display:none;
 }
-
 </style>
 </head>
 <body>
@@ -2456,7 +2448,7 @@ function showdown(){
 
     results.forEach(result=>{
         html+=`
-            <tr>
+            <tr style="${tiedBest.includes(result)?'background:#ffd54f;color:black;font-weight:bold;':''}">
                 <td>${result.player.name}</td>
                 <td>${result.handEval.label}</td>
                 <td>${result.handPoints}</td>
@@ -2520,11 +2512,7 @@ function updateAll(){
     document.getElementById("turnState").innerText=handOver ? "HAND OVER — Start Next Hand" : turnState+" — "+currentPlayer().name;
     document.getElementById("deckCount").innerText=deck.length+" cards";
     document.getElementById("burnCount").innerText=burnPile.length+" cards";
-
-    const banner=document.getElementById("finalHandBanner");
-    if(banner){
-        banner.style.display = finalHandTriggered ? "block" : "none";
-    }
+const banner=document.getElementById("finalHandBanner"); if(banner){banner.style.display=finalHandTriggered?"block":"none";}
 }
 
 startNewHand();
