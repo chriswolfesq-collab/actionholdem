@@ -1513,6 +1513,52 @@ function applyBonusToPlayer(playerIndex){
     return true;
 }
 
+
+function canPlayActionCard(card){
+
+    if(card.action==="change_community"){
+        const communityCount = flop.length + (turnCard ? 1 : 0) + (riverCard ? 1 : 0);
+        if(communityCount===0){
+            return {valid:false, reason:"No community cards have been revealed yet."};
+        }
+    }
+
+    if(card.action==="trade_hands"){
+        if(players.length < 2){
+            return {valid:false, reason:"No valid target available."};
+        }
+    }
+
+    if(card.action==="bonus_self" || card.action==="bonus_targeted"){
+        if(deck.length===0){
+            return {valid:false, reason:"Deck is empty."};
+        }
+    }
+
+    if(card.action==="burn_targeted"){
+        const validTargets = players.filter((p,i)=>i!==currentPlayerIndex && p.hand.length>1);
+        if(validTargets.length===0){
+            return {valid:false, reason:"No valid burn targets."};
+        }
+    }
+
+    if(card.action==="burn_all"){
+        const validTargets = players.filter((p,i)=>i!==currentPlayerIndex && p.hand.length>1);
+        if(validTargets.length===0){
+            return {valid:false, reason:"No players can be burned."};
+        }
+    }
+
+    if(card.action==="peek_targeted" || card.action==="face_up_targeted" || card.action==="skip"){
+        if(players.length < 2){
+            return {valid:false, reason:"No valid target available."};
+        }
+    }
+
+    return {valid:true};
+}
+
+
 async function resolveActionCard(card){
     if(card.action==="peek_targeted"){
         const idx=await chooseTarget(true);
@@ -1705,6 +1751,15 @@ async function discardCard(index){
     const discarded=player.hand.splice(index,1)[0];
 
     if(discarded.category==="action"){
+
+        const validation = canPlayActionCard(discarded);
+
+        if(!validation.valid){
+            alert(validation.reason);
+            player.hand.splice(index,0,discarded);
+            updateAll();
+            return;
+        }
 
         const resolved=await resolveActionCard(discarded);
 
