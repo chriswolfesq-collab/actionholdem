@@ -474,6 +474,47 @@ th,td{border:1px solid #ccc;padding:7px;text-align:left;}
  to{transform:scale(1);opacity:1;}
 }
 
+
+.gameOverModal{
+ display:none;
+ position:fixed;
+ inset:0;
+ background:rgba(0,0,0,.85);
+ z-index:10001;
+}
+.gameOverContent{
+ background:white;
+ color:black;
+ max-width:600px;
+ margin:80px auto;
+ padding:30px;
+ border-radius:16px;
+ text-align:center;
+}
+
+
+.targetModal{
+ display:none;
+ position:fixed;
+ inset:0;
+ background:rgba(0,0,0,.8);
+ z-index:10002;
+}
+.targetContent{
+ background:white;
+ color:black;
+ max-width:500px;
+ margin:100px auto;
+ padding:25px;
+ border-radius:16px;
+ text-align:center;
+}
+.targetBtn{
+ display:block;
+ width:100%;
+ margin:8px 0;
+}
+
 </style>
 </head>
 <body>
@@ -519,7 +560,6 @@ Target:
 
 </div>
 
-<h3>v5.6 — Rules Button</h3>
 
 <div class="controls">
 
@@ -715,6 +755,24 @@ Target:
   </div>
 </div>
 
+
+<div id="gameOverModal" class="gameOverModal">
+  <div class="gameOverContent">
+    <h1>🏆 GAME OVER</h1>
+    <div id="gameOverBody"></div>
+    <button onclick="closeGameOverModal()">Close</button>
+  </div>
+</div>
+
+
+<div id="targetModal" class="targetModal">
+ <div class="targetContent">
+   <h2>🎯 Choose Target</h2>
+   <div id="targetButtons"></div>
+   <button onclick="cancelTargetSelection()">Cancel</button>
+ </div>
+</div>
+
 <script>
 let deck=[];
 let players=[];
@@ -761,6 +819,15 @@ function toggleSettings(){
     }
 }
 
+
+
+function showGameOverModal(content){
+ document.getElementById('gameOverBody').innerHTML=content;
+ document.getElementById('gameOverModal').style.display='block';
+}
+function closeGameOverModal(){
+ document.getElementById('gameOverModal').style.display='none';
+}
 
 function showHandCompleteModal(){
  document.getElementById('handCompleteModal').style.display='block';
@@ -1131,21 +1198,42 @@ function drawFromDiscard(){
     updateAll();
 }
 
+
+let targetSelectionCallback=null;
+
 function chooseTarget(excludeSelf=true){
-    let options=players
-        .map((p,i)=>({p,i}))
-        .filter(x=>!excludeSelf || x.i!==currentPlayerIndex)
-        .map(x=>`${x.i}: ${x.p.name}`)
-        .join("\\n");
-    let choice=prompt("Choose target by number:\\n"+options);
-    if(choice===null) return null;
-    let idx=parseInt(choice,10);
-    if(Number.isNaN(idx) || idx<0 || idx>=players.length || (excludeSelf && idx===currentPlayerIndex)){
-        alert("Invalid target.");
-        return null;
-    }
-    return idx;
+    const modal=document.getElementById('targetModal');
+    const buttons=document.getElementById('targetButtons');
+
+    return new Promise(resolve=>{
+        targetSelectionCallback=resolve;
+        buttons.innerHTML='';
+
+        players.forEach((p,i)=>{
+            if(excludeSelf && i===currentPlayerIndex) return;
+
+            const btn=document.createElement('button');
+            btn.className='targetBtn';
+            btn.textContent=p.name;
+            btn.onclick=()=>{
+                modal.style.display='none';
+                resolve(i);
+            };
+            buttons.appendChild(btn);
+        });
+
+        modal.style.display='block';
+    });
 }
+
+function cancelTargetSelection(){
+    document.getElementById('targetModal').style.display='none';
+    if(targetSelectionCallback){
+        targetSelectionCallback(null);
+        targetSelectionCallback=null;
+    }
+}
+
 
 function burnRandomCardFromPlayer(playerIndex){
 
@@ -1170,62 +1258,32 @@ function burnRandomCardFromPlayer(playerIndex){
     return true;
 }
 
-function chooseCommunityCard(){
+async function chooseCommunityCard(){
 
-    const availableCards = [];
+    return new Promise(resolve=>{
+        const modal=document.getElementById('targetModal');
+        const buttons=document.getElementById('targetButtons');
+        buttons.innerHTML='';
 
-    flop.forEach((card,index)=>{
-        availableCards.push({
-            label:"Flop " + (index+1) + ": " + card.name,
-            area:"flop",
-            index:index
+        const availableCards=[];
+
+        flop.forEach((card,index)=>availableCards.push({label:'Flop '+(index+1)+': '+card.name,area:'flop',index:index}));
+        if(turnCard) availableCards.push({label:'Turn: '+turnCard.name,area:'turn',index:0});
+        if(riverCard) availableCards.push({label:'River: '+riverCard.name,area:'river',index:0});
+
+        availableCards.forEach(item=>{
+            const btn=document.createElement('button');
+            btn.className='targetBtn';
+            btn.textContent=item.label;
+            btn.onclick=()=>{
+                modal.style.display='none';
+                resolve(item);
+            };
+            buttons.appendChild(btn);
         });
+
+        modal.style.display='block';
     });
-
-    if(turnCard){
-        availableCards.push({
-            label:"Turn: " + turnCard.name,
-            area:"turn",
-            index:0
-        });
-    }
-
-    if(riverCard){
-        availableCards.push({
-            label:"River: " + riverCard.name,
-            area:"river",
-            index:0
-        });
-    }
-
-    if(availableCards.length===0){
-        alert("There are no community cards to change yet.");
-        return null;
-    }
-
-    const options =
-        availableCards
-        .map((item,index)=> index + ": " + item.label)
-        .join("\n");
-
-    const choice =
-        prompt("Choose community card to replace:\n" + options);
-
-    if(choice===null) return null;
-
-    const selectedIndex =
-        parseInt(choice,10);
-
-    if(
-        Number.isNaN(selectedIndex) ||
-        selectedIndex<0 ||
-        selectedIndex>=availableCards.length
-    ){
-        alert("Invalid community card choice.");
-        return null;
-    }
-
-    return availableCards[selectedIndex];
 }
 
 function replaceCommunityCard(selection){
@@ -1440,9 +1498,9 @@ function applyBonusToPlayer(playerIndex){
     return true;
 }
 
-function resolveActionCard(card){
+async function resolveActionCard(card){
     if(card.action==="peek_targeted"){
-        const idx=chooseTarget(true);
+        const idx=await chooseTarget(true);
         if(idx===null) return false;
         alert(players[idx].name+"'s hand: "+players[idx].hand.map(c=>c.name).join(", "));
         log(currentPlayer().name+" peeked at "+players[idx].name+"'s hand.");
@@ -1450,7 +1508,7 @@ function resolveActionCard(card){
     }
 
     if(card.action==="face_up_targeted"){
-        const idx=chooseTarget(true);
+        const idx=await chooseTarget(true);
         if(idx===null) return false;
         players[idx].effects.faceUp=true;
         log(players[idx].name+" must play face up.");
@@ -1464,7 +1522,7 @@ function resolveActionCard(card){
     }
 
     if(card.action==="skip"){
-        const idx=chooseTarget(true);
+        const idx=await chooseTarget(true);
         if(idx===null) return false;
         players[idx].effects.skip=true;
         log(players[idx].name+" will lose their next turn.");
@@ -1482,7 +1540,7 @@ function resolveActionCard(card){
             return false;
         }
 
-        const idx=chooseTarget(true);
+        const idx=await chooseTarget(true);
 
         if(idx===null) return false;
 
@@ -1518,7 +1576,7 @@ function resolveActionCard(card){
     if(card.action==="change_community"){
 
         const selection =
-            chooseCommunityCard();
+            await chooseCommunityCard();
 
         if(selection===null) return false;
 
@@ -1537,7 +1595,7 @@ function resolveActionCard(card){
 
     if(card.action==="trade_hands"){
 
-        const idx=chooseTarget(true);
+        const idx=await chooseTarget(true);
 
         if(idx===null) return false;
 
@@ -1551,7 +1609,7 @@ function resolveActionCard(card){
 
     if(card.action==="full_reset_targeted"){
 
-        const idx=chooseTarget(true);
+        const idx=await chooseTarget(true);
 
         if(idx===null) return false;
 
@@ -1580,7 +1638,7 @@ function resolveActionCard(card){
 
     if(card.action==="bonus_targeted"){
 
-        const idx=chooseTarget(true);
+        const idx=await chooseTarget(true);
 
         if(idx===null) return false;
 
@@ -1592,7 +1650,7 @@ function resolveActionCard(card){
     return true;
 }
 
-function discardCard(index){
+async function discardCard(index){
     if(handOver){ alert("Hand is over. Start the next hand."); return; }
 
     if(turnState!=="MUST_DISCARD"){
@@ -1622,7 +1680,7 @@ function discardCard(index){
 
     if(discarded.category==="action"){
 
-        const resolved=resolveActionCard(discarded);
+        const resolved=await resolveActionCard(discarded);
 
         if(!resolved){
             // If the player cancels target selection or the effect cannot resolve,
@@ -2358,6 +2416,7 @@ function showdown(){
             ).join("") +
             "</ol>";
 
+        showGameOverModal(winnerMessage);
         handOver=true;
     }
 
