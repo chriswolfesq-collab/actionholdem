@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Action Hold 'Em v5.7 Custom Card Backs</title>
+<title>Action Hold 'Em v7.0</title>
 <style>
 :root{
     --felt:#0f5132;
@@ -604,9 +604,6 @@ Target:
             </button>
         </div>
 
-        <h3 style="margin-top:20px;">Burn Pile</h3>
-        <div id="burnCount"></div>
-
         <h3 style="margin-top:20px;">Discard Pile</h3>
         <div class="smallNote">Only the top card is available.</div>
         <div id="discard"></div>
@@ -616,6 +613,9 @@ Target:
                 Draw From Discard
             </button>
         </div>
+
+        <h3 style="margin-top:20px;">Burn Pile</h3>
+        <div id="burnCount"></div>
     </div>
 
     <div class="panel communityPanel">
@@ -634,8 +634,14 @@ Target:
         </div>
     </div>
 
-    <div class="panel rightPanel">
+    <div class="panel rightPanel" style="outline:3px solid #F1C40F; background:rgba(255,255,255,.22);">
         <h3>Current Player Hand</h3>
+
+        <div id="turnGuide" style="background:rgba(241,196,15,.2);border:2px solid #F1C40F;border-radius:10px;padding:12px;margin-bottom:10px;text-align:center;">
+            <div id="guidePhase" style="font-size:18px;font-weight:900;margin-bottom:6px;"></div>
+            <div id="guideAction" style="font-size:16px;"></div>
+        </div>
+
         <div class="smallNote">During MUST DISCARD, click a card to discard it or play it as an Action Card.</div>
 
         <div id="revealHandArea" style="margin-bottom:10px;"></div>
@@ -1058,6 +1064,7 @@ function autoRevealNextStreet(){
     currentPlayerIndex=0;
     turnState="MUST_DRAW";
     lastDrawnFromDiscardId=null;
+    handRevealed=false;
 
     if(phase==="PRE-FLOP"){
 
@@ -1583,6 +1590,17 @@ async function resolveActionCard(card){
 
     if(card.action==="change_community"){
 
+        const communityCount =
+            flop.length +
+            (turnCard ? 1 : 0) +
+            (riverCard ? 1 : 0);
+
+        if(communityCount===0){
+
+            alert("No community cards have been revealed yet.");
+            return false;
+        }
+
         const selection =
             await chooseCommunityCard();
 
@@ -1997,6 +2015,8 @@ function renderHandPreview(){
         label=result.label;
         points=result.points;
 
+        var cardsUsed=(result.cardsUsed||[]).join(" ");
+
     } else if(standardCards.length){
 
         const ranks=standardCards.map(card=>{
@@ -2053,6 +2073,10 @@ function renderHandPreview(){
 
         <div style="font-size:18px;margin-top:4px;">
             ${points} Points
+        </div>
+
+        <div style="font-size:12px;margin-top:8px;opacity:.9;">
+            ${typeof cardsUsed !== 'undefined' ? cardsUsed : ''}
         </div>
     `;
 }
@@ -2194,6 +2218,7 @@ function straightHighFromRanks(ranks){
             best=Math.max(best, run[4]===1 ? 5 : run[4]);
         }
     }
+    if(best && !best.cardsUsed && bestCombo){ best.cardsUsed = bestCombo.map(c=>c.name); }
     return best;
 }
 
@@ -2224,7 +2249,8 @@ function evaluateConcreteFive(cards, usedWild){
         return {
             label:natural ? "Natural Royal Flush" : "Royal Flush",
             points:natural ? 500 : 350,
-            tie:[14]
+            tie:[14],
+            cardsUsed: combo.map(c=>c.name)
         };
     }
 
@@ -2232,7 +2258,8 @@ function evaluateConcreteFive(cards, usedWild){
         return {
             label:natural ? "Natural Straight Flush" : "Straight Flush",
             points:natural ? 300 : 225,
-            tie:[straightHigh]
+            tie:[straightHigh],
+            cardsUsed: cards.map(c=>c.name)
         };
     }
 
@@ -2242,7 +2269,8 @@ function evaluateConcreteFive(cards, usedWild){
         return {
             label:natural ? "Natural Four of a Kind" : "Four of a Kind",
             points:natural ? 200 : 150,
-            tie:[fourRank,kicker]
+            tie:[fourRank,kicker],
+            cardsUsed: cards.map(c=>c.name)
         };
     }
 
@@ -2250,7 +2278,8 @@ function evaluateConcreteFive(cards, usedWild){
         return {
             label:"Full House",
             points:125,
-            tie:[groups[0].rank, groups[1].rank]
+            tie:[groups[0].rank, groups[1].rank],
+            cardsUsed: cards.map(c=>c.name)
         };
     }
 
@@ -2258,7 +2287,8 @@ function evaluateConcreteFive(cards, usedWild){
         return {
             label:"Flush",
             points:100,
-            tie:ranks
+            tie:ranks,
+            cardsUsed: cards.map(c=>c.name)
         };
     }
 
@@ -2266,7 +2296,8 @@ function evaluateConcreteFive(cards, usedWild){
         return {
             label:"Straight",
             points:80,
-            tie:[straightHigh]
+            tie:[straightHigh],
+            cardsUsed: cards.map(c=>c.name)
         };
     }
 
@@ -2275,7 +2306,8 @@ function evaluateConcreteFive(cards, usedWild){
         return {
             label:"Three of a Kind",
             points:40,
-            tie:[groups[0].rank,...kickers]
+            tie:[groups[0].rank,...kickers],
+            cardsUsed: cards.map(c=>c.name)
         };
     }
 
@@ -2285,7 +2317,8 @@ function evaluateConcreteFive(cards, usedWild){
         return {
             label:"Two Pair",
             points:30,
-            tie:[...pairs,kicker]
+            tie:[...pairs,kicker],
+            cardsUsed: cards.map(c=>c.name)
         };
     }
 
@@ -2295,7 +2328,8 @@ function evaluateConcreteFive(cards, usedWild){
         return {
             label:"One Pair",
             points:-25,
-            tie:[pair,...kickers]
+            tie:[pair,...kickers],
+            cardsUsed: cards.map(c=>c.name)
         };
     }
 
@@ -2314,7 +2348,8 @@ function expandAndEvaluateFive(combo){
         return {
             label:"Four of a Kind (All Wild Cards)",
             points:200,
-            tie:[14]
+            tie:[14],
+            cardsUsed: cards.map(c=>c.name)
         };
     }
 
@@ -2368,11 +2403,13 @@ function evaluatePlayerBestHand(player){
 
     const fiveCardCombos=combinations(available,5);
     let best=null;
+    let bestCombo=null;
 
     for(const combo of fiveCardCombos){
         const evalResult=expandAndEvaluateFive(combo);
         if(evalResult && compareEvaluations(evalResult,best)>0){
             best=evalResult;
+            bestCombo=combo;
         }
     }
 
@@ -2545,7 +2582,7 @@ function showdown(){
         html+=`
             <tr style="${isWinningHand ? 'background:linear-gradient(#ffe082,#ffd54f);color:black;font-weight:bold;' : ''}">
                 <td>${result.player.name}</td>
-                <td>${result.handEval.label}</td>
+                <td>${result.handEval.label}<br><small>${(result.handEval.cardsUsed||[]).join(" ")}</small></td>
                 <td>${result.handPoints}</td>
                 <td>${result.bestBonus}</td>
                 <td>${result.penalty}</td>
@@ -2595,12 +2632,49 @@ function renderStats(){
 }
 
 
+
+function updateTurnGuide(){
+
+    const phaseEl=document.getElementById("guidePhase");
+    const actionEl=document.getElementById("guideAction");
+
+    if(!phaseEl || !actionEl) return;
+
+    let titleText="";
+    let actionText="";
+
+    if(handOver){
+
+        titleText="HAND COMPLETE";
+        actionText="Review Results or Start Next Hand";
+
+    }else{
+
+        titleText=phase + " • " + currentPlayer().name + "'s Turn";
+
+        if(!handRevealed){
+            actionText="Pass Device and Reveal Hand";
+        }else if(turnState==="MUST_DRAW"){
+            actionText="Next Step: Draw a Card";
+        }else if(turnState==="MUST_DISCARD"){
+            actionText="Next Step: Discard a Card";
+        }else{
+            actionText="Waiting For Next Player";
+        }
+    }
+
+    phaseEl.textContent=titleText;
+    actionEl.textContent=actionText;
+}
+
+
 function updateAll(){
     renderScoreboard();
     renderStats();
     renderPlayers();
     renderHand();
     renderHandPreview();
+    updateTurnGuide();
     renderDiscard();
     renderBoard();
     updateButtons();
