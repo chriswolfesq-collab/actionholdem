@@ -498,6 +498,7 @@ Target:
 
 <div class="section"><h3>Scoreboard</h3><div id="scoreboard"></div></div>
 
+
 <div class="section">
 <h3>Players</h3>
 <div class="smallNote">Opponent cards stay hidden unless Face Up, Peeked, or during Showdown.</div>
@@ -568,12 +569,59 @@ Target:
 </div>
 <div class="section"><h3>Showdown Results</h3><div id="results"></div></div>
 <div class="section"><h3>Game Log</h3><div id="log"></div></div>
+<div class="section"><h3>Statistics</h3><div id="stats"></div></div>
 
 
 <div id="rulesModal" class="rulesModal">
   <div class="rulesContent">
     <button onclick="closeRules()">Close</button>
     <h2>Action Hold 'Em Rules</h2>
+    <h3>How to Play</h3>
+
+    <p><strong>Goal:</strong> Be the first player to reach the target score. Once a player reaches the target score, the current hand becomes the final hand. After that hand is scored, the highest total score wins.</p>
+
+    <h4>Starting a Hand</h4>
+    <ul>
+      <li>Each player starts with 2 cards.</li>
+      <li>No community cards are revealed yet.</li>
+      <li>The game begins in the Pre-Flop phase.</li>
+    </ul>
+
+    <h4>Your Turn</h4>
+    <ol>
+      <li><strong>Draw</strong> from either the Deck or the Discard Pile.</li>
+      <li><strong>Discard</strong> one card from your hand.</li>
+    </ol>
+
+    <p>You may discard a normal card or play an Action Card. Your turn ends immediately after discarding.</p>
+
+    <h4>Community Cards</h4>
+    <ul>
+      <li><strong>Flop:</strong> 3 community cards revealed.</li>
+      <li><strong>Turn:</strong> 1 additional community card revealed.</li>
+      <li><strong>River:</strong> 1 final community card revealed.</li>
+      <li><strong>Showdown:</strong> All hands are scored automatically.</li>
+    </ul>
+
+    <h4>Building Your Hand</h4>
+    <ul>
+      <li>Use your hand cards and the community cards.</li>
+      <li>Only 5 cards may be used to create a scoring hand.</li>
+    </ul>
+
+    <h4>Important Rules</h4>
+    <ul>
+      <li>Action Cards cannot appear in the community cards.</li>
+      <li>Wild Cards cannot appear in the community cards.</li>
+      <li>Action Cards cannot be drawn from the discard pile.</li>
+      <li>If you draw from the discard pile, you cannot immediately discard that same card.</li>
+      <li>Skip causes a player to lose their next turn.</li>
+      <li>Face Up forces a player's hand to remain visible.</li>
+    </ul>
+
+    <h4>End of Hand</h4>
+    <p>After the River round, all hands are scored, action card penalties are applied, bonuses are awarded, and scores are added to the scoreboard.</p>
+
 
     <h3>Scoring</h3>
     <ul>
@@ -640,6 +688,14 @@ let playerNames=['Player 1','Player 2','Player 3','Player 4','Player 5','Player 
 let playerCount=4;
 let targetScore=500;
 let finalHandTriggered=false;
+
+let gameStats={
+    handsPlayed:0,
+    showdowns:0,
+    bestHand:"None",
+    bestHandPoints:0,
+    highestSingleHandScore:0
+};
 
 
 function toggleSettings(){
@@ -801,6 +857,7 @@ function startNewHand(){
     phase="PRE-FLOP"; turnState="MUST_DRAW"; lastDrawnFromDiscardId=null;
     for(let p of players){ p.hand.push(deck.pop()); p.hand.push(deck.pop()); }
     createInitialDiscard();
+    gameStats.handsPlayed++;
     log("New hand started");
     document.getElementById("results").innerHTML="";
     updateAll();
@@ -1731,7 +1788,7 @@ function hiddenHandHtml(player){
                 <div class="backLogo">
                     <div class="backAction">ACTION</div>
                     <div class="backHoldem">HOLD 'EM</div>
-                    <div class="cornerClub">♣</div><div class="cornerHeart">♥</div>
+                    <div class="backSuits">♥ ♣ ♦ ♠</div>
                 </div>
             </div>
         `;
@@ -2183,6 +2240,18 @@ function showdown(){
         gameScores[result.playerIndex] += result.total;
     });
 
+    gameStats.showdowns++;
+
+    results.forEach(result=>{
+        if(result.handEval.points > gameStats.bestHandPoints){
+            gameStats.bestHandPoints = result.handEval.points;
+            gameStats.bestHand = result.handEval.label;
+        }
+        if(result.total > gameStats.highestSingleHandScore){
+            gameStats.highestSingleHandScore = result.total;
+        }
+    });
+
     handAlreadyScored=true;
     handOver=true;
 
@@ -2279,8 +2348,22 @@ function updateButtons(){
         topDiscard.category==="action";
 }
 
+
+function renderStats(){
+    document.getElementById("stats").innerHTML=`
+    <table>
+        <tr><td>Hands Played</td><td><strong>${gameStats.handsPlayed}</strong></td></tr>
+        <tr><td>Showdowns</td><td><strong>${gameStats.showdowns}</strong></td></tr>
+        <tr><td>Best Hand Seen</td><td><strong>${gameStats.bestHand}</strong></td></tr>
+        <tr><td>Best Hand Points</td><td><strong>${gameStats.bestHandPoints}</strong></td></tr>
+        <tr><td>Highest Single Hand Score</td><td><strong>${gameStats.highestSingleHandScore}</strong></td></tr>
+    </table>`;
+}
+
+
 function updateAll(){
     renderScoreboard();
+    renderStats();
     renderPlayers();
     renderHand();
     renderDiscard();
