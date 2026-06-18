@@ -34,13 +34,12 @@ button:disabled{
     cursor:not-allowed;
 }
 .controls{
-    background:rgba(0,0,0,.22);
-    border:1px solid var(--panel-border);
-    border-radius:14px;
-    padding:10px;
-    max-width:950px;
+    background:none;
+    border:none;
+    padding:0;
     margin:12px auto;
 }
+
 .card{
     display:inline-flex;
     justify-content:center;
@@ -235,17 +234,24 @@ table{border-collapse:collapse;width:100%;}
 th,td{border:1px solid #ccc;padding:7px;text-align:left;}
 .smallNote{font-size:13px;opacity:.9;}
 .passScreen{
-    background:rgba(0,0,0,.35);
-    border:2px solid rgba(255,255,255,.35);
-    border-radius:14px;
-    padding:20px;
+    background:rgba(0,0,0,.55);
+    border:3px solid #ffd54f;
+    border-radius:18px;
+    padding:30px;
     margin:10px 0;
     text-align:center;
+    box-shadow:0 0 20px rgba(255,213,79,.35);
 }
 .passPlayer{
-    font-size:28px;
+    font-size:42px;
+    font-weight:900;
+    color:#ffd54f;
+    margin:20px 0;
+}
+.phaseBanner{
+    font-size:22px;
     font-weight:bold;
-    margin:15px 0;
+    margin:10px 0;
 }
 
 /* v5.3 card visual upgrade */
@@ -515,6 +521,19 @@ th,td{border:1px solid #ccc;padding:7px;text-align:left;}
  margin:8px 0;
 }
 
+
+.finalHandBanner{
+    background:#c62828;
+    color:white;
+    max-width:700px;
+    margin:12px auto;
+    padding:12px;
+    border-radius:12px;
+    font-weight:bold;
+    display:none;
+    box-shadow:0 0 12px rgba(0,0,0,.4);
+}
+
 </style>
 </head>
 <body>
@@ -568,15 +587,14 @@ Target:
 <button onclick="openRules()">📖 How to Play & Rules</button>
 </div>
 
+
+<div class="section"><h3>Scoreboard</h3><div id="scoreboard"></div></div>
+<div id="finalHandBanner" class="finalHandBanner">⚠ FINAL HAND ACTIVE<br>This is the final hand. Highest score wins.</div>
+
 <div class="statusBar">
   <div class="statusBox"><strong>Current Phase</strong><div id="phase"></div></div>
   <div class="statusBox"><strong>Turn State</strong><div id="turnState"></div></div>
 </div>
-
-
-
-<div class="section"><h3>Scoreboard</h3><div id="scoreboard"></div></div>
-
 
 <div class="section">
 <h3>Players</h3>
@@ -1963,10 +1981,20 @@ function renderHand(){
 
         revealArea.innerHTML = `
             <div class="passScreen">
-                <div>Pass Device To</div>
 
                 <div class="passPlayer">
                     ${player.name}
+                </div>
+
+                <div class="phaseBanner">
+                    ${phase}
+                </div>
+
+                <div style="margin:15px 0;font-size:18px;">
+                    ${phase==="PRE-FLOP" ? "Draw a card to begin your turn." :
+                      phase==="FLOP" ? "Three community cards are now in play." :
+                      phase==="TURN" ? "One additional community card has been revealed." :
+                      "Final round before showdown."}
                 </div>
 
                 <button onclick="revealCurrentHand()">
@@ -2492,6 +2520,11 @@ function updateAll(){
     document.getElementById("turnState").innerText=handOver ? "HAND OVER — Start Next Hand" : turnState+" — "+currentPlayer().name;
     document.getElementById("deckCount").innerText=deck.length+" cards";
     document.getElementById("burnCount").innerText=burnPile.length+" cards";
+
+    const banner=document.getElementById("finalHandBanner");
+    if(banner){
+        banner.style.display = finalHandTriggered ? "block" : "none";
+    }
 }
 
 startNewHand();
