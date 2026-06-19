@@ -520,7 +520,7 @@ th,td{border:1px solid #ccc;padding:7px;text-align:left;}
     max-width:1500px;
     margin:18px auto;
     display:grid;
-    grid-template-columns:150px 1fr 190px;
+    grid-template-columns:1fr 220px;
     gap:16px;
     align-items:start;
 }
@@ -782,6 +782,24 @@ th,td{border:1px solid #ccc;padding:7px;text-align:left;}
     }
 }
 
+
+.dealerButton{
+position:absolute;
+top:-10px;
+right:-10px;
+width:30px;
+height:30px;
+border-radius:50%;
+background:white;
+color:black;
+font-weight:900;
+display:flex;
+align-items:center;
+justify-content:center;
+border:2px solid #111;
+box-shadow:0 2px 6px rgba(0,0,0,.5);
+}
+
 </style>
 </head>
 <body>
@@ -841,27 +859,6 @@ Target:
 
 <div class="casinoLayout">
 
-    <div class="sideStats">
-        <div class="statBlock">
-            <h3>DECK</h3>
-            <div id="deckCount" class="statNumber">0</div>
-            <div class="statLabel">cards</div>
-        </div>
-
-        <div class="statBlock">
-            <h3>DISCARD</h3>
-            <div id="discardCount" class="statNumber">0</div>
-            <div class="statLabel">cards</div>
-            <div id="discard" class="miniDiscardCard"></div>
-        </div>
-
-        <div class="statBlock">
-            <h3>BURN</h3>
-            <div id="burnCount" class="statNumber">0</div>
-            <div class="statLabel">cards</div>
-        </div>
-    </div>
-
     <div class="tableCenterStack">
         <div class="pokerTable">
             <div id="players" class="seatLayer"></div>
@@ -907,6 +904,13 @@ Target:
                 <button id="drawBtn" onclick="drawFromDeck()">Draw From Deck</button>
                 <button id="drawDiscardBtn" onclick="drawFromDiscard()">Draw From Discard</button>
                 <button id="nextHandBtn" onclick="startNewHand()">Start Next Hand</button>
+
+                <div style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.25);">
+                    <div><strong>Deck:</strong> <span id="deckCount">0</span></div>
+                    <div style="margin-top:8px;"><strong>Discard:</strong> <span id="discardCount">0</span></div>
+                    <div id="discard" class="miniDiscardCard" style="margin:8px auto;"></div>
+                    <div><strong>Burn:</strong> <span id="burnCount">0</span></div>
+                </div>
             </div>
         </div>
     </div>
@@ -1067,6 +1071,7 @@ Target:
 let deck=[];
 let players=[];
 let currentPlayerIndex=0;
+let dealerIndex=-1;
 let gameScores=[0,0,0,0];
 let handAlreadyScored=false;
 let handOver=false;
@@ -1241,6 +1246,8 @@ function startNewGame(){
 }
 
 function startNewHand(){
+
+    dealerIndex=(dealerIndex+1)%playerCount;
 
     handOver = false;
     handAlreadyScored = false;
@@ -2293,7 +2300,7 @@ function renderPlayers(){
 
         html+=`
             <div class="seat seat-${i} ${isCurrent ? "currentPlayer" : ""}">
-                <div class="seatAvatar">👤</div>
+                <div class="seatAvatar">👤</div>${i===dealerIndex?'<div class="dealerButton">D</div>':""}
                 <div class="seatHeader">
                     <div>${isCurrent ? "▶ " : ""}${p.name}</div>
                     <div class="seatScore">$${gameScores[i] || 0}</div>
@@ -2551,7 +2558,7 @@ function straightHighFromRanks(ranks){
             best=Math.max(best, run[4]===1 ? 5 : run[4]);
         }
     }
-    if(best && !best.cardsUsed && bestCombo){ best.cardsUsed = bestCombo.map(c=>c.name); }
+    
     return best;
 }
 
