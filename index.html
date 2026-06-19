@@ -800,6 +800,24 @@ border:2px solid #111;
 box-shadow:0 2px 6px rgba(0,0,0,.5);
 }
 
+
+.turnModal{
+ display:none;
+ position:fixed;
+ inset:0;
+ background:rgba(0,0,0,.88);
+ z-index:10050;
+}
+.turnModalContent{
+ max-width:600px;
+ margin:120px auto;
+ background:white;
+ color:black;
+ border-radius:16px;
+ padding:30px;
+ text-align:center;
+}
+
 </style>
 </head>
 <body>
@@ -1067,6 +1085,19 @@ Target:
  </div>
 </div>
 
+
+<div id="turnModal" class="turnModal">
+ <div class="turnModalContent">
+   <h1>🎯 NEXT PLAYER</h1>
+   <div id="turnModalPlayer" style="font-size:38px;font-weight:900;margin:20px 0;"></div>
+   <div id="turnModalPhase" style="font-size:24px;margin-bottom:10px;"></div>
+   <div id="turnModalAction" style="font-size:20px;margin-bottom:20px;"></div>
+   <button onclick="closeTurnModalAndReveal()" style="font-size:20px;padding:12px 24px;">
+      Reveal Hand
+   </button>
+ </div>
+</div>
+
 <script>
 let deck=[];
 let players=[];
@@ -1139,6 +1170,22 @@ document.getElementById('rulesModal').style.display='none';
 }
 
 function currentPlayer(){ return players[currentPlayerIndex]; }
+function showTurnModal(){
+    const phaseText=phase;
+    let nextAction="Draw a Card";
+    if(turnState==="MUST_DISCARD") nextAction="Discard a Card";
+
+    document.getElementById("turnModalPlayer").innerText=currentPlayer().name;
+    document.getElementById("turnModalPhase").innerText=phaseText+" • "+currentPlayer().name+"'s Turn";
+    document.getElementById("turnModalAction").innerText="Next Step: "+nextAction;
+    document.getElementById("turnModal").style.display="block";
+}
+
+function closeTurnModalAndReveal(){
+    document.getElementById("turnModal").style.display="none";
+    revealCurrentHand();
+}
+
 function log(message){ document.getElementById("log").innerHTML=message+"<br>"+document.getElementById("log").innerHTML; }
 function createCard(card){ return {id:nextCardId++,...card}; }
 
@@ -1281,6 +1328,7 @@ function startNewHand(){
     createInitialDiscard();
     gameStats.handsPlayed++;
     log("New hand started");
+    setTimeout(showTurnModal,100);
     document.getElementById("results").innerHTML="";
     updateAll();
 }
@@ -1366,6 +1414,7 @@ function autoRevealNextStreet(){
         log("Flop automatically revealed.");
 
         updateAll();
+        showTurnModal();
 
         return;
     }
@@ -1383,6 +1432,7 @@ function autoRevealNextStreet(){
         log("Turn automatically revealed.");
 
         updateAll();
+        showTurnModal();
 
         return;
     }
@@ -1400,6 +1450,7 @@ function autoRevealNextStreet(){
         log("River automatically revealed.");
 
         updateAll();
+        showTurnModal();
 
         return;
     }
@@ -1462,9 +1513,10 @@ function autoAdvanceAfterDiscard(){
 
     handRevealed=false;
 
-    log("Pass device to "+currentPlayer().name+". Then click Reveal Hand.");
+    log("Pass device to "+currentPlayer().name+".");
 
     updateAll();
+    showTurnModal();
 }
 
 
