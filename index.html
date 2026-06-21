@@ -700,7 +700,7 @@ th,td{border:1px solid #ccc;padding:7px;text-align:left;}
 .controlPanel{
     margin-top:70px;
     display:grid;
-    grid-template-columns:1fr 230px;
+    grid-template-columns:1fr 230px 230px;
     gap:16px;
 }
 
@@ -818,6 +818,138 @@ box-shadow:0 2px 6px rgba(0,0,0,.5);
  text-align:center;
 }
 
+
+/* v9.0 UX / Intuitiveness Overhaul */
+.uxCurrentTask{
+    background:rgba(241,196,15,.28) !important;
+    border:3px solid #F1C40F !important;
+    box-shadow:0 0 16px rgba(241,196,15,.45);
+}
+.uxTaskTitle{
+    font-size:13px;
+    letter-spacing:1.5px;
+    font-weight:900;
+    opacity:.9;
+}
+.uxTaskAction{
+    font-size:30px;
+    font-weight:900;
+    margin-top:4px;
+    color:#fff8c6;
+}
+.uxTaskSub{
+    font-size:14px;
+    margin-top:6px;
+    opacity:.95;
+}
+.legalCard{
+    outline:4px solid #F1C40F;
+    box-shadow:0 0 18px rgba(241,196,15,.85), 0 4px 10px rgba(0,0,0,.35);
+    animation:legalPulse 1.4s infinite;
+}
+@keyframes legalPulse{
+    0%{transform:scale(1);}
+    50%{transform:scale(1.035);}
+    100%{transform:scale(1);}
+}
+.buttonReason{
+    font-size:12px;
+    opacity:.9;
+    margin:-2px 0 8px 0;
+}
+.cardUsedLine{
+    margin-top:7px;
+    font-size:14px;
+    color:#fff7b0;
+    font-weight:900;
+}
+.boardStreetLabels{
+    display:grid;
+    grid-template-columns:300px 100px 100px;
+    gap:10px;
+    align-items:end;
+    justify-content:center;
+    width:100%;
+    font-size:12px;
+    letter-spacing:1px;
+    font-weight:900;
+    opacity:.95;
+}
+.boardStreetLabel{
+    background:rgba(0,0,0,.35);
+    border:1px solid rgba(255,255,255,.25);
+    border-radius:8px;
+    padding:4px 8px;
+}
+.streetModal{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.82);
+    z-index:10060;
+}
+.streetModalContent{
+    max-width:560px;
+    margin:130px auto;
+    background:white;
+    color:black;
+    border-radius:18px;
+    padding:28px;
+    text-align:center;
+}
+.actionHelpModal{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.86);
+    z-index:10070;
+}
+.actionHelpContent{
+    max-width:560px;
+    margin:95px auto;
+    background:white;
+    color:black;
+    border-radius:18px;
+    padding:28px;
+    text-align:center;
+}
+.actionHelpTitle{
+    font-size:34px;
+    font-weight:900;
+    margin-bottom:8px;
+}
+.actionHelpText{
+    font-size:18px;
+    line-height:1.35;
+    margin:14px 0;
+}
+.actionHelpPenalty{
+    font-size:22px;
+    font-weight:900;
+    color:#b00000;
+    margin:12px 0;
+}
+.recentActionItem{
+    padding:8px;
+    border-bottom:1px solid rgba(255,255,255,.15);
+    text-align:left;
+    font-size:13px;
+}
+#recentActionsFeed{
+    margin:10px 0;
+    max-height:260px;
+    overflow-y:auto;
+    background:rgba(255,255,255,.08);
+    border-radius:8px;
+}
+.discardLabel{
+    font-size:12px;
+    letter-spacing:1px;
+    font-weight:900;
+    margin-top:8px;
+    opacity:.9;
+}
+
 </style>
 </head>
 <body>
@@ -883,6 +1015,7 @@ Target:
 
             <div class="communityCenter">
                 <div class="communityLabel">COMMUNITY CARDS</div>
+                <div class="boardStreetLabels"><div class="boardStreetLabel">FLOP</div><div class="boardStreetLabel">TURN</div><div class="boardStreetLabel">RIVER</div></div>
                 <div id="communityRow">
                     <div id="flop"></div>
                     <div id="turn"></div>
@@ -918,36 +1051,35 @@ Target:
                 <div id="hand"></div>
             </div>
 
-            <div class="quickButtons">
+            
+<div class="quickButtons">
                 <button id="drawBtn" onclick="drawFromDeck()">Draw From Deck</button>
+                <div id="drawDeckReason" class="buttonReason"></div>
+
                 <button id="drawDiscardBtn" onclick="drawFromDiscard()">Draw From Discard</button>
+                <div id="drawDiscardReason" class="buttonReason"></div>
+
                 <button id="nextHandBtn" onclick="startNewHand()">Start Next Hand</button>
+                <div id="nextHandReason" class="buttonReason"></div>
 
                 <div style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.25);">
                     <div><strong>Deck:</strong> <span id="deckCount">0</span></div>
-                    <div style="margin-top:8px;"><strong>Discard:</strong> <span id="discardCount">0</span></div>
+                    <div class="discardLabel">TOP DISCARD</div>
+                    <div style="margin-top:4px;"><strong>Discard:</strong> <span id="discardCount">0</span></div>
                     <div id="discard" class="miniDiscardCard" style="margin:8px auto;"></div>
                     <div><strong>Burn:</strong> <span id="burnCount">0</span></div>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <div class="rightRail">
-        <h3>Recent Actions</h3>
-        <div class="smallNote">Full log is below.</div>
-        <div class="card deckBack" onclick="drawFromDeck()" style="margin:20px auto;">
-            <div class="backLogo">
-                <div class="backAction">ACTION</div>
-                <div class="backHoldem">HOLD 'EM</div>
-                <div class="cornerClub">♣</div>
-                <div class="cornerHeart">♥</div>
+            <div class="rightRail">
+                <h3>Recent Actions</h3>
+                <div class="smallNote">Last 10 actions</div>
+                <div id="recentActionsFeed"><div class="recentActionItem">No actions yet.</div></div>
+                <button onclick="openRules()" style="margin-top:12px;width:100%;">How to Play & Rules</button>
             </div>
-        </div>
-        <button onclick="openRules()">How to Play & Rules</button>
-    </div>
 
-</div>
+        </div>
+    </div>
 
 <div class="section"><h3>Showdown Results</h3><div id="results"></div></div>
 <div class="section"><h3>Game Log</h3><div id="log"></div></div>
@@ -1098,6 +1230,25 @@ Target:
  </div>
 </div>
 
+
+<div id="streetModal" class="streetModal">
+  <div class="streetModalContent">
+    <h1 id="streetModalTitle">Street Revealed</h1>
+    <div id="streetModalBody" style="font-size:20px;margin:16px 0;"></div>
+    <button onclick="closeStreetModal()" style="font-size:18px;padding:12px 24px;">Continue</button>
+  </div>
+</div>
+
+<div id="actionHelpModal" class="actionHelpModal">
+  <div class="actionHelpContent">
+    <div id="actionHelpTitle" class="actionHelpTitle"></div>
+    <div id="actionHelpText" class="actionHelpText"></div>
+    <div id="actionHelpPenalty" class="actionHelpPenalty"></div>
+    <button onclick="confirmActionCard()" style="font-size:18px;padding:12px 24px;">Play Card</button>
+    <button onclick="cancelActionCard()" style="font-size:18px;padding:12px 24px;background:#ddd;color:#111;">Cancel</button>
+  </div>
+</div>
+
 <script>
 let deck=[];
 let players=[];
@@ -1122,6 +1273,8 @@ let playerNames=['Player 1','Player 2','Player 3','Player 4','Player 5','Player 
 let playerCount=4;
 let targetScore=500;
 let finalHandTriggered=false;
+let recentActions=[];
+let pendingActionCardIndex=null;
 
 let gameStats={
     handsPlayed:0,
@@ -1170,14 +1323,103 @@ document.getElementById('rulesModal').style.display='none';
 }
 
 function currentPlayer(){ return players[currentPlayerIndex]; }
+
+function renderRecentActions(){
+    const panel=document.getElementById("recentActionsFeed");
+    if(!panel) return;
+    if(!recentActions.length){
+        panel.innerHTML="<div class='recentActionItem'>No actions yet.</div>";
+        return;
+    }
+    panel.innerHTML=recentActions.map(a=>`<div class="recentActionItem">${a}</div>`).join("");
+}
+
+function getNextStepText(){
+    if(handOver) return "Start Next Hand";
+    if(turnState==="MUST_DRAW") return "Draw a Card";
+    if(turnState==="MUST_DISCARD") return "Discard a Card";
+    if(turnState==="TURN_COMPLETE") return "Pass Device";
+    return "Continue";
+}
+
+function getWhatHappensNextText(){
+    if(turnState==="MUST_DRAW") return "Then discard one card to finish your turn.";
+    if(turnState==="MUST_DISCARD") return "Click one glowing card. Action Cards will explain themselves before they play.";
+    if(phase==="RIVER") return "After every player acts, the hand scores automatically.";
+    return "After every player acts, the next community card stage will reveal.";
+}
+
+function actionCardDescription(card){
+    const descriptions={
+        skip:"Target player loses their next turn.",
+        trade_hands:"Swap your hand with another player.",
+        pass_left:"Everyone passes their hand to the left.",
+        pass_right:"Everyone passes their hand to the right.",
+        burn_targeted:"Target player loses one random card.",
+        burn_all:"All opponents with enough cards lose one random card.",
+        full_reset_targeted:"Target player burns their hand and draws 2 new cards.",
+        full_reset_self:"You burn your hand and draw 2 new cards.",
+        full_reset_all:"All other players burn their hands and draw 2 new cards.",
+        bonus_targeted:"Target player draws one extra card.",
+        bonus_self:"You draw one extra card.",
+        change_community:"Replace one revealed community card.",
+        face_up_targeted:"Target player's hand stays visible.",
+        face_up_self:"Your hand stays visible.",
+        peek_targeted:"View another player's hand."
+    };
+    return descriptions[card.action] || "Play this Action Card.";
+}
+
+function showStreetModal(title, body){
+    const modal=document.getElementById("streetModal");
+    if(!modal) return;
+    document.getElementById("streetModalTitle").innerText=title;
+    document.getElementById("streetModalBody").innerText=body;
+    modal.style.display="block";
+}
+
+function closeStreetModal(){
+    const modal=document.getElementById("streetModal");
+    if(modal) modal.style.display="none";
+    showTurnModal();
+}
+
+function showActionHelpModal(card,index){
+    pendingActionCardIndex=index;
+    document.getElementById("actionHelpTitle").innerText=card.name;
+    document.getElementById("actionHelpText").innerText=actionCardDescription(card);
+    document.getElementById("actionHelpPenalty").innerText="Penalty: "+card.penalty+" points";
+    document.getElementById("actionHelpModal").style.display="block";
+}
+
+function cancelActionCard(){
+    pendingActionCardIndex=null;
+    document.getElementById("actionHelpModal").style.display="none";
+}
+
+function previewActionCard(index){
+    const card=currentPlayer().hand[index];
+    if(!card) return;
+    showActionHelpModal(card,index);
+}
+
+function confirmActionCard(){
+    const idx=pendingActionCardIndex;
+    pendingActionCardIndex=null;
+    document.getElementById("actionHelpModal").style.display="none";
+    if(idx!==null && idx!==undefined){
+        discardCard(idx,true);
+    }
+}
+
 function showTurnModal(){
+    if(handOver) return;
     const phaseText=phase;
-    let nextAction="Draw a Card";
-    if(turnState==="MUST_DISCARD") nextAction="Discard a Card";
+    const nextAction=getNextStepText();
 
     document.getElementById("turnModalPlayer").innerText=currentPlayer().name;
     document.getElementById("turnModalPhase").innerText=phaseText+" • "+currentPlayer().name+"'s Turn";
-    document.getElementById("turnModalAction").innerText="Next Step: "+nextAction;
+    document.getElementById("turnModalAction").innerText="Next Step: "+nextAction+" — "+getWhatHappensNextText();
     document.getElementById("turnModal").style.display="block";
 }
 
@@ -1186,7 +1428,15 @@ function closeTurnModalAndReveal(){
     revealCurrentHand();
 }
 
-function log(message){ document.getElementById("log").innerHTML=message+"<br>"+document.getElementById("log").innerHTML; }
+function log(message){
+    const logEl=document.getElementById("log");
+    if(logEl){
+        logEl.innerHTML=message+"<br>"+logEl.innerHTML;
+    }
+    recentActions.unshift(message);
+    recentActions=recentActions.slice(0,10);
+    renderRecentActions();
+}
 function createCard(card){ return {id:nextCardId++,...card}; }
 
 function createDeck(){
@@ -1414,7 +1664,7 @@ function autoRevealNextStreet(){
         log("Flop automatically revealed.");
 
         updateAll();
-        showTurnModal();
+        showStreetModal("FLOP REVEALED","3 community cards added. Player 1 starts the Flop round.");
 
         return;
     }
@@ -1432,7 +1682,7 @@ function autoRevealNextStreet(){
         log("Turn automatically revealed.");
 
         updateAll();
-        showTurnModal();
+        showStreetModal("TURN REVEALED","1 community card added. Player 1 starts the Turn round.");
 
         return;
     }
@@ -1450,7 +1700,7 @@ function autoRevealNextStreet(){
         log("River automatically revealed.");
 
         updateAll();
-        showTurnModal();
+        showStreetModal("RIVER REVEALED","Final community card added. After this round, the hand scores automatically.");
 
         return;
     }
@@ -2057,7 +2307,7 @@ async function resolveActionCard(card){
     return true;
 }
 
-async function discardCard(index){
+async function discardCard(index, confirmedAction=false){
     if(handOver){ alert("Hand is over. Start the next hand."); return; }
 
     if(turnState!=="MUST_DISCARD"){
@@ -2086,6 +2336,12 @@ async function discardCard(index){
     const discarded=player.hand.splice(index,1)[0];
 
     if(discarded.category==="action"){
+
+        if(!confirmedAction){
+            player.hand.splice(index,0,discarded);
+            previewActionCard(index);
+            return;
+        }
 
         const validation = canPlayActionCard(discarded);
 
@@ -2467,9 +2723,7 @@ function renderHandPreview(){
             ${points} Points
         </div>
 
-        <div style="font-size:12px;margin-top:8px;opacity:.9;">
-            ${typeof cardsUsed !== 'undefined' ? cardsUsed : ''}
-        </div>
+        <div class="cardUsedLine">${typeof cardsUsed !== 'undefined' && cardsUsed ? "Using: " + cardsUsed : ""}</div>
     `;
 }
 
@@ -2510,14 +2764,19 @@ function renderHand(){
     revealArea.innerHTML = "";
 
     document.getElementById("hand").innerHTML =
-        player.hand.map((c,i)=>
-            cardHtml(
-                c,
-                turnState==="MUST_DISCARD"
-                    ? `onclick="discardCard(${i})"`
-                    : ""
-            )
-        ).join("");
+        player.hand.map((c,i)=>{
+            let click="";
+            if(turnState==="MUST_DISCARD"){
+                click = c.category==="action"
+                    ? `onclick="previewActionCard(${i})"`
+                    : `onclick="discardCard(${i})"`;
+            }
+            let html=cardHtml(c,click);
+            if(turnState==="MUST_DISCARD"){
+                html=html.replace('class="card ','class="card legalCard ');
+            }
+            return html;
+        }).join("");
 }
 
 
@@ -2642,7 +2901,7 @@ function evaluateConcreteFive(cards, usedWild){
             label:natural ? "Natural Royal Flush" : "Royal Flush",
             points:natural ? 500 : 350,
             tie:[14],
-            cardsUsed: combo.map(c=>c.name)
+            cardsUsed: cards.map(c=>c.name)
         };
     }
 
@@ -3019,26 +3278,43 @@ function showdown(){
 function updateButtons(){
 
     const drawBtn=document.getElementById("drawBtn");
-    if(drawBtn){
-        drawBtn.disabled =
-            handOver || turnState!=="MUST_DRAW";
-    }
-
-    const topDiscard =
-        discardPile.length ? discardPile[discardPile.length-1] : null;
-
     const drawDiscardBtn=document.getElementById("drawDiscardBtn");
-    if(drawDiscardBtn){
-        drawDiscardBtn.disabled =
-            handOver ||
-            turnState!=="MUST_DRAW" ||
-            !topDiscard ||
-            topDiscard.category==="action";
+    const nextHandBtn=document.getElementById("nextHandBtn");
+
+    const drawDeckReason=document.getElementById("drawDeckReason");
+    const drawDiscardReason=document.getElementById("drawDiscardReason");
+    const nextHandReason=document.getElementById("nextHandReason");
+
+    const topDiscard=discardPile.length ? discardPile[discardPile.length-1] : null;
+
+    if(drawBtn){
+        const disabled=handOver || turnState!=="MUST_DRAW" || deck.length===0 || !handRevealed;
+        drawBtn.disabled=disabled;
+        if(drawDeckReason){
+            drawDeckReason.innerText = !handRevealed ? "Reveal hand first." :
+                handOver ? "Hand is over." :
+                turnState!=="MUST_DRAW" ? "Must discard before drawing again." :
+                deck.length===0 ? "Deck is empty." : "";
+        }
     }
 
-    const nextHandBtn=document.getElementById("nextHandBtn");
+    if(drawDiscardBtn){
+        const disabled=handOver || turnState!=="MUST_DRAW" || !topDiscard || topDiscard.category==="action" || !handRevealed;
+        drawDiscardBtn.disabled=disabled;
+        if(drawDiscardReason){
+            drawDiscardReason.innerText = !handRevealed ? "Reveal hand first." :
+                handOver ? "Hand is over." :
+                turnState!=="MUST_DRAW" ? "Must discard before drawing again." :
+                !topDiscard ? "Discard pile is empty." :
+                topDiscard.category==="action" ? "Action Cards cannot be drawn from discard." : "";
+        }
+    }
+
     if(nextHandBtn){
-        nextHandBtn.disabled = !handOver && !handAlreadyScored;
+        nextHandBtn.disabled=!handOver && !handAlreadyScored;
+        if(nextHandReason){
+            nextHandReason.innerText = nextHandBtn.disabled ? "Available after scoring." : "";
+        }
     }
 }
 
@@ -3060,34 +3336,20 @@ function updateTurnGuide(){
 
     const phaseEl=document.getElementById("guidePhase");
     const actionEl=document.getElementById("guideAction");
+    const guide=document.getElementById("turnGuide");
 
     if(!phaseEl || !actionEl) return;
 
-    let titleText="";
-    let actionText="";
+    if(guide) guide.classList.add("uxCurrentTask");
 
     if(handOver){
-
-        titleText="HAND COMPLETE";
-        actionText="Review Results or Start Next Hand";
-
-    }else{
-
-        titleText=phase + " • " + currentPlayer().name + "'s Turn";
-
-        if(!handRevealed){
-            actionText="Pass Device and Reveal Hand";
-        }else if(turnState==="MUST_DRAW"){
-            actionText="Next Step: Draw a Card";
-        }else if(turnState==="MUST_DISCARD"){
-            actionText="Next Step: Discard a Card";
-        }else{
-            actionText="Waiting For Next Player";
-        }
+        phaseEl.innerHTML="<div class='uxTaskTitle'>HAND COMPLETE</div>";
+        actionEl.innerHTML="<div class='uxTaskAction'>START NEXT HAND</div><div class='uxTaskSub'>Review the results, then start the next hand.</div>";
+        return;
     }
 
-    phaseEl.textContent=titleText;
-    actionEl.textContent=actionText;
+    phaseEl.innerHTML="<div class='uxTaskTitle'>YOUR TURN</div><div style='font-size:18px;font-weight:900;margin-top:4px;'>"+phase+" • "+currentPlayer().name+"</div>";
+    actionEl.innerHTML="<div class='uxTaskAction'>"+getNextStepText().toUpperCase()+"</div><div class='uxTaskSub'>"+getWhatHappensNextText()+"</div>";
 }
 
 
@@ -3101,6 +3363,7 @@ function updateAll(){
     updateButtons();
     updateTurnGuide();
     renderStats();
+    renderRecentActions();
 
     const phaseEl=document.getElementById("phase");
     if(phaseEl) phaseEl.innerText=phase;
