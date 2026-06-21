@@ -2626,11 +2626,11 @@ function moveToNextAvailablePlayer(){
 
         advanceToNextPlayer();
 
-        if(currentPlayer().effects.skip){
+        if((currentPlayer().effects.skip||0) > 0){
 
             log(currentPlayer().name+" was skipped.");
 
-            currentPlayer().effects.skip=false;
+            currentPlayer().effects.skip--;
 
             turnsTakenThisRound++;
 
@@ -3188,7 +3188,7 @@ async function resolveActionCard(card){
     if(card.action==="skip"){
         const idx=await chooseTarget(true);
         if(idx===null) return false;
-        players[idx].effects.skip=true;
+        players[idx].effects.skip=(players[idx].effects.skip||0)+1;
         log(players[idx].name+" will lose their next turn.");
         return true;
     }
