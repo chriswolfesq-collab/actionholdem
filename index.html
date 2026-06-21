@@ -1020,6 +1020,403 @@ box-shadow:0 2px 6px rgba(0,0,0,.5);
     margin:20px auto !important;
 }
 
+
+/* v9.6 Action Card Animation Layer */
+#actionAnimationLayer{
+    display:none;
+    position:fixed;
+    inset:0;
+    z-index:10150;
+    pointer-events:none;
+    background:rgba(0,0,0,.28);
+}
+
+.actionAnimCard{
+    position:absolute;
+    left:50%;
+    top:58%;
+    width:130px;
+    height:185px;
+    transform:translate(-50%, -50%) scale(.45) rotate(-14deg);
+    border-radius:14px;
+    border:3px solid #F1C40F;
+    background:linear-gradient(145deg,#111,#333);
+    color:white;
+    box-shadow:
+        0 0 24px rgba(241,196,15,.95),
+        0 0 70px rgba(241,196,15,.55),
+        0 12px 28px rgba(0,0,0,.65);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    font-weight:900;
+    animation:actionCardFly .95s ease-out forwards;
+}
+
+.actionAnimTitle{
+    font-size:20px;
+    text-transform:uppercase;
+    line-height:1.05;
+    padding:0 8px;
+}
+
+.actionAnimIcon{
+    font-size:46px;
+    margin:10px 0;
+}
+
+.actionAnimPenalty{
+    position:absolute;
+    right:8px;
+    bottom:8px;
+    font-size:22px;
+    color:#ffdddd;
+}
+
+.actionAnimText{
+    position:absolute;
+    left:50%;
+    top:75%;
+    transform:translateX(-50%);
+    min-width:360px;
+    max-width:650px;
+    padding:14px 20px;
+    background:rgba(0,0,0,.82);
+    border:2px solid #F1C40F;
+    border-radius:14px;
+    color:white;
+    font-size:24px;
+    font-weight:900;
+    text-align:center;
+    box-shadow:0 0 22px rgba(241,196,15,.45);
+    animation:actionTextPop .95s ease-out forwards;
+}
+
+.actionAnimBurst{
+    position:absolute;
+    left:50%;
+    top:50%;
+    width:18px;
+    height:18px;
+    border-radius:50%;
+    transform:translate(-50%,-50%);
+    background:#F1C40F;
+    box-shadow:
+        0 0 20px #F1C40F,
+        0 0 55px #F1C40F,
+        0 0 95px rgba(241,196,15,.75);
+    animation:actionBurst .95s ease-out forwards;
+}
+
+@keyframes actionCardFly{
+    0%{
+        opacity:0;
+        transform:translate(-50%, 140%) scale(.35) rotate(-24deg);
+    }
+    30%{
+        opacity:1;
+    }
+    72%{
+        transform:translate(-50%, -62%) scale(1.08) rotate(7deg);
+    }
+    100%{
+        opacity:0;
+        transform:translate(-50%, -76%) scale(1.18) rotate(0deg);
+    }
+}
+
+@keyframes actionTextPop{
+    0%{
+        opacity:0;
+        transform:translateX(-50%) scale(.85);
+    }
+    22%{
+        opacity:0;
+    }
+    45%{
+        opacity:1;
+        transform:translateX(-50%) scale(1.04);
+    }
+    100%{
+        opacity:0;
+        transform:translateX(-50%) scale(1);
+    }
+}
+
+@keyframes actionBurst{
+    0%{
+        opacity:0;
+        transform:translate(-50%,-50%) scale(.3);
+    }
+    45%{
+        opacity:1;
+        transform:translate(-50%,-50%) scale(5);
+    }
+    100%{
+        opacity:0;
+        transform:translate(-50%,-50%) scale(10);
+    }
+}
+
+.seat.actionPulse{
+    animation:seatActionPulse .95s ease-out;
+}
+
+@keyframes seatActionPulse{
+    0%{box-shadow:0 0 0 rgba(241,196,15,0);}
+    35%{box-shadow:0 0 35px rgba(241,196,15,.95);}
+    100%{box-shadow:0 5px 14px rgba(0,0,0,.45);}
+}
+
+
+/* v9.7 Unique Action FX */
+.fxOverlay{display:none;position:fixed;inset:0;z-index:10180;pointer-events:none;}
+.fxCenter{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:120px;font-weight:900;animation:fxPop 1.2s ease-out forwards;}
+.fxBurn{color:#ff5722;text-shadow:0 0 30px #ff5722,0 0 60px #ff9800;}
+.fxTrade{color:#ffd54f;}
+.fxReset{color:#4fc3f7;}
+@keyframes fxPop{
+0%{opacity:0;transform:translate(-50%,-50%) scale(.3);}
+20%{opacity:1;}
+100%{opacity:0;transform:translate(-50%,-50%) scale(1.8);}
+}
+
+
+/* v9.8 Table Motion Action Animations */
+#tableMotionLayer{
+    display:none;
+    position:fixed;
+    inset:0;
+    z-index:10220;
+    pointer-events:none;
+    background:rgba(0,0,0,.20);
+}
+
+.motionCard{
+    position:fixed;
+    width:70px;
+    height:98px;
+    border-radius:10px;
+    border:2px solid white;
+    background:#050505;
+    box-shadow:0 0 18px rgba(255,255,255,.55), 0 8px 18px rgba(0,0,0,.55);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:white;
+    font-weight:900;
+    font-size:18px;
+}
+
+.motionCard::before{
+    content:"ACTION";
+    font-size:12px;
+    color:#ffd54f;
+}
+
+.motionLabel{
+    position:fixed;
+    left:50%;
+    top:18%;
+    transform:translateX(-50%);
+    background:rgba(0,0,0,.82);
+    border:2px solid #F1C40F;
+    color:white;
+    padding:12px 22px;
+    border-radius:14px;
+    font-size:26px;
+    font-weight:900;
+    text-align:center;
+    box-shadow:0 0 24px rgba(241,196,15,.45);
+    animation:motionLabelPop 1.3s ease-out forwards;
+}
+
+.motionFlame{
+    position:fixed;
+    font-size:62px;
+    filter:drop-shadow(0 0 20px #ff5722);
+    animation:flameBurst 1.35s ease-out forwards;
+}
+
+.motionPlus{
+    position:fixed;
+    font-size:72px;
+    color:#39e75f;
+    text-shadow:0 0 22px #39e75f;
+    animation:plusPop 1.2s ease-out forwards;
+}
+
+.motionStamp{
+    position:fixed;
+    left:50%;
+    top:50%;
+    transform:translate(-50%,-50%) rotate(-12deg);
+    color:#ff3131;
+    border:8px solid #ff3131;
+    border-radius:18px;
+    padding:18px 36px;
+    font-size:58px;
+    font-weight:900;
+    background:rgba(0,0,0,.55);
+    text-shadow:0 0 16px rgba(255,0,0,.7);
+    animation:stampSlam 1.25s ease-out forwards;
+}
+
+.motionEye{
+    position:fixed;
+    left:50%;
+    top:50%;
+    transform:translate(-50%,-50%);
+    font-size:125px;
+    text-shadow:0 0 30px rgba(255,255,255,.85);
+    animation:eyeZoom 1.25s ease-out forwards;
+}
+
+.motionArrowRing{
+    position:fixed;
+    left:50%;
+    top:50%;
+    width:280px;
+    height:280px;
+    margin-left:-140px;
+    margin-top:-140px;
+    border:6px dashed #F1C40F;
+    border-radius:50%;
+    animation:ringSpin 1.35s ease-out forwards;
+}
+
+.motionArrowRing::before{
+    content:attr(data-arrow);
+    position:absolute;
+    left:50%;
+    top:-38px;
+    transform:translateX(-50%);
+    font-size:58px;
+}
+
+@keyframes motionLabelPop{
+    0%{opacity:0;transform:translateX(-50%) scale(.85);}
+    18%{opacity:1;transform:translateX(-50%) scale(1.05);}
+    80%{opacity:1;}
+    100%{opacity:0;transform:translateX(-50%) scale(1);}
+}
+
+@keyframes flameBurst{
+    0%{opacity:0;transform:scale(.3) translateY(30px);}
+    30%{opacity:1;transform:scale(1.25) translateY(0);}
+    100%{opacity:0;transform:scale(2.2) translateY(-70px);}
+}
+
+@keyframes plusPop{
+    0%{opacity:0;transform:scale(.25);}
+    30%{opacity:1;transform:scale(1.2);}
+    100%{opacity:0;transform:scale(1.8) translateY(-60px);}
+}
+
+@keyframes stampSlam{
+    0%{opacity:0;transform:translate(-50%,-50%) scale(2.6) rotate(-20deg);}
+    25%{opacity:1;transform:translate(-50%,-50%) scale(.95) rotate(-12deg);}
+    78%{opacity:1;}
+    100%{opacity:0;transform:translate(-50%,-50%) scale(1.08) rotate(-12deg);}
+}
+
+@keyframes eyeZoom{
+    0%{opacity:0;transform:translate(-50%,-50%) scale(.2);}
+    30%{opacity:1;transform:translate(-50%,-50%) scale(1.15);}
+    100%{opacity:0;transform:translate(-50%,-50%) scale(1.6);}
+}
+
+@keyframes ringSpin{
+    0%{opacity:0;transform:scale(.35) rotate(0deg);}
+    20%{opacity:1;}
+    100%{opacity:0;transform:scale(1.45) rotate(360deg);}
+}
+
+
+/* v9.9 Community Card Deal Animations */
+#streetDealLayer{
+ display:none;
+ position:fixed;
+ inset:0;
+ z-index:10300;
+ pointer-events:none;
+}
+.dealAnimCard{
+ position:fixed;
+ width:90px;
+ height:130px;
+ border-radius:10px;
+ border:2px solid white;
+ background:#111;
+ box-shadow:0 0 18px rgba(255,255,255,.5);
+}
+
+
+/* v9.9.1 Stable Street Deal Animations */
+#streetDealLayer{
+    display:none;
+    position:fixed;
+    inset:0;
+    z-index:10300;
+    pointer-events:none;
+    background:rgba(0,0,0,.16);
+}
+.dealAnimCard{
+    position:fixed;
+    width:90px;
+    height:130px;
+    border-radius:10px;
+    border:2px solid white;
+    background:#111;
+    box-shadow:0 0 18px rgba(255,255,255,.55), 0 8px 18px rgba(0,0,0,.55);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#ffd54f;
+    font-size:13px;
+    font-weight:900;
+    transform-style:preserve-3d;
+}
+.dealAnimCard::before{
+    content:"ACTION";
+}
+.streetDealLabel{
+    position:fixed;
+    left:50%;
+    top:19%;
+    transform:translateX(-50%);
+    background:rgba(0,0,0,.84);
+    border:2px solid #F1C40F;
+    color:white;
+    padding:12px 24px;
+    border-radius:14px;
+    font-size:26px;
+    font-weight:900;
+    box-shadow:0 0 24px rgba(241,196,15,.5);
+}
+
+
+/* v10.0 Opening Hand Deal Animation */
+#openingDealLayer{
+ display:none;
+ position:fixed;
+ inset:0;
+ z-index:10400;
+ pointer-events:none;
+ background:rgba(0,0,0,.15);
+}
+.openingDealCard{
+ position:fixed;
+ width:90px;
+ height:130px;
+ border-radius:10px;
+ border:2px solid white;
+ background:#111;
+ box-shadow:0 0 18px rgba(255,255,255,.55);
+}
+
 </style>
 </head>
 <body>
@@ -1380,6 +1777,27 @@ Target:
   </div>
 </div>
 
+
+<div id="actionAnimationLayer">
+    <div class="actionAnimBurst"></div>
+    <div id="actionAnimCard" class="actionAnimCard">
+        <div id="actionAnimTitle" class="actionAnimTitle"></div>
+        <div id="actionAnimIcon" class="actionAnimIcon">⚡</div>
+        <div id="actionAnimPenalty" class="actionAnimPenalty"></div>
+    </div>
+    <div id="actionAnimText" class="actionAnimText"></div>
+</div>
+
+
+<div id="fxOverlay" class="fxOverlay">
+<div id="fxCenter" class="fxCenter">⚡</div>
+</div>
+
+
+<div id="tableMotionLayer"></div>
+
+<div id="streetDealLayer"></div>
+<div id="openingDealLayer"></div>
 <script>
 let deck=[];
 let players=[];
@@ -1530,6 +1948,368 @@ function getWhatHappensNextText(){
     if(turnState==="MUST_DISCARD") return "Click one glowing card. Action Cards will explain themselves before they play.";
     if(phase==="RIVER") return "After every player acts, the hand scores automatically.";
     return "After every player acts, the next community card stage will reveal.";
+}
+
+
+function actionIconFor(card){
+    const icons={
+        skip:"⏭️",
+        trade_hands:"🤝",
+        pass_left:"⬅️",
+        pass_right:"➡️",
+        burn_targeted:"🔥",
+        burn_all:"🔥",
+        full_reset_targeted:"🔄",
+        full_reset_self:"🔄",
+        full_reset_all:"🔄",
+        bonus_targeted:"➕",
+        bonus_self:"➕",
+        change_community:"🃏",
+        face_up_targeted:"👁️",
+        face_up_self:"👁️",
+        peek_targeted:"🔍"
+    };
+    return icons[card.action] || "⚡";
+}
+
+function playActionAnimation(card, playerName){
+    return new Promise(resolve=>{
+        const layer=document.getElementById("actionAnimationLayer");
+        if(!layer){
+            resolve();
+            return;
+        }
+
+        const title=document.getElementById("actionAnimTitle");
+        const icon=document.getElementById("actionAnimIcon");
+        const penalty=document.getElementById("actionAnimPenalty");
+        const text=document.getElementById("actionAnimText");
+
+        title.innerText=card.name || "Action Card";
+        icon.innerText=actionIconFor(card);
+        penalty.innerText=card.penalty ? card.penalty : "";
+        text.innerText=(playerName || "Player")+" played "+(card.name || "an Action Card")+"!";
+
+        layer.style.display="block";
+
+        const currentSeat=document.querySelector(".seat.currentPlayer");
+        if(currentSeat){
+            currentSeat.classList.remove("actionPulse");
+            void currentSeat.offsetWidth;
+            currentSeat.classList.add("actionPulse");
+        }
+
+        setTimeout(()=>{
+            layer.style.display="none";
+            if(currentSeat) currentSeat.classList.remove("actionPulse");
+            resolve();
+        }, 950);
+    });
+}
+
+
+async function playUniqueActionAnimation(card){
+ return new Promise(resolve=>{
+   const overlay=document.getElementById('fxOverlay');
+   const center=document.getElementById('fxCenter');
+   if(!overlay||!center){resolve();return;}
+
+   let cls='fxCenter';
+   let txt='⚡';
+
+   if(card.action && card.action.includes('burn')){
+      cls+=' fxBurn'; txt='🔥🔥🔥';
+   }else if(card.action==='trade_hands'){
+      cls+=' fxTrade'; txt='🤝 ⇄ 🃏';
+   }else if(card.action && card.action.includes('full_reset')){
+      cls+=' fxReset'; txt='🔄🃏🔄';
+   }else if(card.action && card.action.includes('bonus')){
+      txt='➕🃏';
+   }else if(card.action==='pass_left'){
+      txt='⬅️⬅️⬅️';
+   }else if(card.action==='pass_right'){
+      txt='➡️➡️➡️';
+   }else if(card.action==='skip'){
+      txt='⛔ SKIPPED';
+   }else if(card.action==='change_community'){
+      txt='🃏↺';
+   }else if(card.action && card.action.includes('face_up')){
+      txt='👁️';
+   }else if(card.action && card.action.includes('peek')){
+      txt='🔍';
+   }
+
+   center.className=cls;
+   center.innerHTML=txt;
+   overlay.style.display='block';
+
+   setTimeout(()=>{
+      overlay.style.display='none';
+      resolve();
+   },1200);
+ });
+}
+
+
+function getRectCenter(el){
+    if(!el){
+        return {x:window.innerWidth/2,y:window.innerHeight/2};
+    }
+    const r=el.getBoundingClientRect();
+    return {x:r.left+r.width/2,y:r.top+r.height/2};
+}
+
+function getCurrentSeatElement(){
+    return document.querySelector(".seat.currentPlayer");
+}
+
+function getTargetSeatElement(){
+    // Best effort. Target selection happens inside individual card effects and is not always stored.
+    // So this highlights the table center when the exact target is not available.
+    return document.querySelector(".seat.currentPlayer");
+}
+
+function createMotionCard(layer, x, y){
+    const card=document.createElement("div");
+    card.className="motionCard";
+    card.style.left=(x-35)+"px";
+    card.style.top=(y-49)+"px";
+    layer.appendChild(card);
+    return card;
+}
+
+function animateElementTo(el, from, to, ms=950, rotate=0){
+    el.animate([
+        {left:(from.x-35)+"px", top:(from.y-49)+"px", transform:"scale(.75) rotate(0deg)", opacity:0},
+        {opacity:1, offset:.18},
+        {left:(to.x-35)+"px", top:(to.y-49)+"px", transform:`scale(1.08) rotate(${rotate}deg)`, opacity:1, offset:.78},
+        {left:(to.x-35)+"px", top:(to.y-49)+"px", transform:`scale(.7) rotate(${rotate}deg)`, opacity:0}
+    ], {duration:ms, easing:"ease-out", fill:"forwards"});
+}
+
+function showMotionLabel(layer, text){
+    const label=document.createElement("div");
+    label.className="motionLabel";
+    label.innerText=text;
+    layer.appendChild(label);
+}
+
+function playTableMotionAnimation(card, playerName){
+    return new Promise(resolve=>{
+        const layer=document.getElementById("tableMotionLayer");
+        if(!layer){
+            resolve();
+            return;
+        }
+
+        layer.innerHTML="";
+        layer.style.display="block";
+
+        const actorSeat=getCurrentSeatElement();
+        const actor=getRectCenter(actorSeat);
+        const tableCenter={x:window.innerWidth/2,y:window.innerHeight/2};
+        const deckEl=document.getElementById("drawBtn");
+        const discardEl=document.getElementById("discard");
+        const deck=getRectCenter(deckEl);
+        const discard=getRectCenter(discardEl);
+
+        const action=card.action || "";
+        const name=card.name || "Action Card";
+
+        showMotionLabel(layer, `${playerName || "Player"} played ${name}`);
+
+        if(action.includes("burn")){
+            const c=createMotionCard(layer, actor.x, actor.y);
+            animateElementTo(c, actor, discard, 1050, 18);
+
+            for(let i=0;i<8;i++){
+                const flame=document.createElement("div");
+                flame.className="motionFlame";
+                flame.innerText="🔥";
+                flame.style.left=(discard.x-30+Math.random()*60)+"px";
+                flame.style.top=(discard.y-60+Math.random()*60)+"px";
+                flame.style.animationDelay=(i*.06)+"s";
+                layer.appendChild(flame);
+            }
+        }else if(action==="trade_hands"){
+            const left={x:actor.x-190,y:actor.y};
+            const right={x:actor.x+190,y:actor.y};
+            const c1=createMotionCard(layer,left.x,left.y);
+            const c2=createMotionCard(layer,right.x,right.y);
+            animateElementTo(c1,left,right,1150,16);
+            animateElementTo(c2,right,left,1150,-16);
+        }else if(action==="pass_left" || action==="pass_right"){
+            const ring=document.createElement("div");
+            ring.className="motionArrowRing";
+            ring.setAttribute("data-arrow", action==="pass_left" ? "⬅️" : "➡️");
+            layer.appendChild(ring);
+
+            const seats=[...document.querySelectorAll(".seat")].slice(0,6);
+            const centers=seats.map(getRectCenter);
+            centers.forEach((from,i)=>{
+                const to=centers[(i+(action==="pass_left"?1:-1)+centers.length)%centers.length] || tableCenter;
+                const c=createMotionCard(layer,from.x,from.y);
+                animateElementTo(c,from,to,1200, action==="pass_left" ? -20 : 20);
+            });
+        }else if(action.includes("full_reset")){
+            for(let i=0;i<3;i++){
+                const c=createMotionCard(layer, actor.x+(i*18)-18, actor.y);
+                animateElementTo(c, {x:actor.x+(i*18)-18,y:actor.y}, discard, 900, 25);
+            }
+            setTimeout(()=>{
+                for(let i=0;i<2;i++){
+                    const c=createMotionCard(layer, deck.x, deck.y);
+                    animateElementTo(c, deck, actor, 750, -15);
+                }
+            },450);
+        }else if(action.includes("bonus")){
+            const plus=document.createElement("div");
+            plus.className="motionPlus";
+            plus.innerText="+1";
+            plus.style.left=(actor.x-35)+"px";
+            plus.style.top=(actor.y-95)+"px";
+            layer.appendChild(plus);
+
+            const c=createMotionCard(layer, deck.x, deck.y);
+            animateElementTo(c, deck, actor, 1000, -10);
+        }else if(action==="skip"){
+            const stamp=document.createElement("div");
+            stamp.className="motionStamp";
+            stamp.innerText="SKIPPED";
+            layer.appendChild(stamp);
+        }else if(action==="change_community"){
+            const c=createMotionCard(layer, tableCenter.x, tableCenter.y);
+            c.innerHTML="↺";
+            c.style.fontSize="46px";
+            c.animate([
+                {transform:"scale(.4) rotate(0deg)", opacity:0},
+                {transform:"scale(1.25) rotate(180deg)", opacity:1},
+                {transform:"scale(.7) rotate(360deg)", opacity:0}
+            ], {duration:1200,easing:"ease-out",fill:"forwards"});
+        }else if(action.includes("peek") || action.includes("face_up")){
+            const eye=document.createElement("div");
+            eye.className="motionEye";
+            eye.innerText= action.includes("peek") ? "🔍" : "👁️";
+            layer.appendChild(eye);
+        }else{
+            const c=createMotionCard(layer, actor.x, actor.y);
+            animateElementTo(c, actor, tableCenter, 900, 12);
+        }
+
+        setTimeout(()=>{
+            layer.style.display="none";
+            layer.innerHTML="";
+            resolve();
+        },1400);
+    });
+}
+
+
+
+function playOpeningDealAnimation(){
+ return new Promise(resolve=>{
+   const layer=document.getElementById("openingDealLayer");
+   if(!layer){ resolve(); return; }
+
+   layer.innerHTML="";
+   layer.style.display="block";
+
+   const deckBtn=document.getElementById("drawBtn");
+   const deckRect=deckBtn ? deckBtn.getBoundingClientRect() : {left:120,top:window.innerHeight-250,width:90,height:130};
+
+   const seats=[...document.querySelectorAll(".seat")].slice(0,playerCount);
+
+   let delay=0;
+
+   for(let round=0; round<2; round++){
+      seats.forEach((seat)=>{
+         const r=seat.getBoundingClientRect();
+
+         const card=document.createElement("div");
+         card.className="openingDealCard";
+         card.style.left=deckRect.left+"px";
+         card.style.top=deckRect.top+"px";
+         layer.appendChild(card);
+
+         card.animate([
+           {left:deckRect.left+"px",top:deckRect.top+"px",transform:"rotate(-15deg) scale(.6)",opacity:0},
+           {opacity:1,offset:.15},
+           {left:(r.left+r.width/2-45)+"px",top:(r.top+r.height/2-65)+"px",transform:"rotate(0deg) scale(1)",opacity:1},
+           {left:(r.left+r.width/2-45)+"px",top:(r.top+r.height/2-65)+"px",transform:"scale(.9)",opacity:0}
+         ],{
+           duration:450,
+           delay:delay,
+           fill:"forwards",
+           easing:"ease-out"
+         });
+
+         delay += 140;
+      });
+   }
+
+   setTimeout(()=>{
+      layer.style.display="none";
+      layer.innerHTML="";
+      resolve();
+   }, delay + 500);
+ });
+}
+
+function playStreetDealAnimation(street){
+ return new Promise(resolve=>{
+   const layer=document.getElementById('streetDealLayer');
+   if(!layer){ resolve(); return; }
+
+   layer.innerHTML='';
+   layer.style.display='block';
+
+   const label=document.createElement('div');
+   label.className='streetDealLabel';
+   label.innerText = street==='FLOP' ? 'DEALING THE FLOP' : street==='TURN' ? 'DEALING THE TURN' : 'DEALING THE RIVER';
+   layer.appendChild(label);
+
+   const deckBtn=document.getElementById('drawBtn');
+   const deckRect=deckBtn ? deckBtn.getBoundingClientRect() : {left:120,top:window.innerHeight-260,width:90,height:130};
+
+   const board=document.getElementById('communityRow');
+   const boardRect=board ? board.getBoundingClientRect() : {left:window.innerWidth/2-220,top:window.innerHeight/2-75,width:440,height:150};
+
+   const count = street==='FLOP' ? 3 : 1;
+   const startX = deckRect.left + deckRect.width/2 - 45;
+   const startY = deckRect.top + deckRect.height/2 - 65;
+
+   for(let i=0;i<count;i++){
+      const card=document.createElement('div');
+      card.className='dealAnimCard';
+      card.style.left=startX+'px';
+      card.style.top=startY+'px';
+      layer.appendChild(card);
+
+      const totalWidth = count * 100;
+      const targetX = boardRect.left + boardRect.width/2 - totalWidth/2 + (i*100);
+      const targetY = boardRect.top + 12;
+
+      card.animate([
+        {left:startX+'px', top:startY+'px', transform:'rotate(-18deg) scale(.55)', opacity:0},
+        {left:startX+'px', top:startY+'px', transform:'rotate(-18deg) scale(.75)', opacity:1, offset:.12},
+        {left:targetX+'px', top:targetY+'px', transform:'rotate(8deg) scale(1)', opacity:1, offset:.70},
+        {left:targetX+'px', top:targetY+'px', transform:'rotateY(180deg) scale(1.05)', opacity:1, offset:.86},
+        {left:targetX+'px', top:targetY+'px', transform:'rotateY(360deg) scale(1)', opacity:0}
+      ],{
+        duration:1050+(i*160),
+        delay:i*110,
+        easing:'ease-out',
+        fill:'forwards'
+      });
+   }
+
+   const totalTime = street==='FLOP' ? 1750 : 1350;
+   setTimeout(()=>{
+      layer.style.display='none';
+      layer.innerHTML='';
+      resolve();
+   }, totalTime);
+ });
 }
 
 function actionCardDescription(card){
@@ -1851,8 +2631,10 @@ function autoRevealNextStreet(){
 
         log("Flop automatically revealed.");
 
-        updateAll();
-        showStreetModal("FLOP REVEALED","3 community cards added. Player 1 starts the Flop round.");
+        playStreetDealAnimation("FLOP").then(()=>{
+            updateAll();
+            showStreetModal("FLOP REVEALED","3 community cards added. Player 1 starts the Flop round.");
+        });
 
         return;
     }
@@ -1869,8 +2651,10 @@ function autoRevealNextStreet(){
 
         log("Turn automatically revealed.");
 
-        updateAll();
-        showStreetModal("TURN REVEALED","1 community card added. Player 1 starts the Turn round.");
+        playStreetDealAnimation("TURN").then(()=>{
+            updateAll();
+            showStreetModal("TURN REVEALED","1 community card added. Player 1 starts the Turn round.");
+        });
 
         return;
     }
@@ -1887,8 +2671,10 @@ function autoRevealNextStreet(){
 
         log("River automatically revealed.");
 
-        updateAll();
-        showStreetModal("RIVER REVEALED","Final community card added. After this round, the hand scores automatically.");
+        playStreetDealAnimation("RIVER").then(()=>{
+            updateAll();
+            showStreetModal("RIVER REVEALED","Final community card added. After this round, the hand scores automatically.");
+        });
 
         return;
     }
@@ -2549,6 +3335,10 @@ async function discardCard(index, confirmedAction=false){
             updateAll();
             return;
         }
+
+        await playActionAnimation(discarded, player.name);
+        await playUniqueActionAnimation(discarded);
+        await playTableMotionAnimation(discarded, player.name);
 
         discardPile.push(discarded);
 
