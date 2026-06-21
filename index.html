@@ -1398,7 +1398,7 @@ box-shadow:0 2px 6px rgba(0,0,0,.5);
 }
 
 
-/* v10.0 Opening Hand Deal Animation */
+/* v10.0.1 Stable Opening Hand Deal Animation */
 #openingDealLayer{
  display:none;
  position:fixed;
@@ -1409,12 +1409,35 @@ box-shadow:0 2px 6px rgba(0,0,0,.5);
 }
 .openingDealCard{
  position:fixed;
- width:90px;
- height:130px;
+ width:70px;
+ height:98px;
  border-radius:10px;
  border:2px solid white;
  background:#111;
- box-shadow:0 0 18px rgba(255,255,255,.55);
+ box-shadow:0 0 18px rgba(255,255,255,.55), 0 8px 18px rgba(0,0,0,.55);
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ color:#ffd54f;
+ font-size:11px;
+ font-weight:900;
+}
+.openingDealCard::before{
+ content:"ACTION";
+}
+.openingDealLabel{
+ position:fixed;
+ left:50%;
+ top:18%;
+ transform:translateX(-50%);
+ background:rgba(0,0,0,.84);
+ border:2px solid #F1C40F;
+ color:white;
+ padding:12px 24px;
+ border-radius:14px;
+ font-size:26px;
+ font-weight:900;
+ box-shadow:0 0 24px rgba(241,196,15,.5);
 }
 
 </style>
@@ -2205,53 +2228,73 @@ function playTableMotionAnimation(card, playerName){
 }
 
 
-
 function playOpeningDealAnimation(){
  return new Promise(resolve=>{
    const layer=document.getElementById("openingDealLayer");
    if(!layer){ resolve(); return; }
 
-   layer.innerHTML="";
-   layer.style.display="block";
-
-   const deckBtn=document.getElementById("drawBtn");
-   const deckRect=deckBtn ? deckBtn.getBoundingClientRect() : {left:120,top:window.innerHeight-250,width:90,height:130};
-
-   const seats=[...document.querySelectorAll(".seat")].slice(0,playerCount);
-
-   let delay=0;
-
-   for(let round=0; round<2; round++){
-      seats.forEach((seat)=>{
-         const r=seat.getBoundingClientRect();
-
-         const card=document.createElement("div");
-         card.className="openingDealCard";
-         card.style.left=deckRect.left+"px";
-         card.style.top=deckRect.top+"px";
-         layer.appendChild(card);
-
-         card.animate([
-           {left:deckRect.left+"px",top:deckRect.top+"px",transform:"rotate(-15deg) scale(.6)",opacity:0},
-           {opacity:1,offset:.15},
-           {left:(r.left+r.width/2-45)+"px",top:(r.top+r.height/2-65)+"px",transform:"rotate(0deg) scale(1)",opacity:1},
-           {left:(r.left+r.width/2-45)+"px",top:(r.top+r.height/2-65)+"px",transform:"scale(.9)",opacity:0}
-         ],{
-           duration:450,
-           delay:delay,
-           fill:"forwards",
-           easing:"ease-out"
-         });
-
-         delay += 140;
-      });
-   }
-
+   // Wait a tick so updateAll() has rendered the correct seats for 2, 3, 4, 5, or 6 players.
    setTimeout(()=>{
-      layer.style.display="none";
-      layer.innerHTML="";
-      resolve();
-   }, delay + 500);
+     layer.innerHTML="";
+     layer.style.display="block";
+
+     const label=document.createElement("div");
+     label.className="openingDealLabel";
+     label.innerText="DEALING CARDS";
+     layer.appendChild(label);
+
+     const deckBtn=document.getElementById("drawBtn");
+     const deckRect=deckBtn ? deckBtn.getBoundingClientRect() : {left:120,top:window.innerHeight-250,width:90,height:130};
+
+     const seats=[...document.querySelectorAll(".seat")].slice(0, playerCount);
+
+     if(!seats.length){
+        layer.style.display="none";
+        resolve();
+        return;
+     }
+
+     const startX=deckRect.left + deckRect.width/2 - 35;
+     const startY=deckRect.top + deckRect.height/2 - 49;
+
+     let delay=0;
+
+     for(let round=0; round<2; round++){
+        seats.forEach((seat)=>{
+           const r=seat.getBoundingClientRect();
+
+           const card=document.createElement("div");
+           card.className="openingDealCard";
+           card.style.left=startX+"px";
+           card.style.top=startY+"px";
+           layer.appendChild(card);
+
+           const targetX=r.left + r.width/2 - 35;
+           const targetY=r.top + r.height/2 - 49;
+
+           card.animate([
+             {left:startX+"px", top:startY+"px", transform:"rotate(-18deg) scale(.55)", opacity:0},
+             {left:startX+"px", top:startY+"px", transform:"rotate(-18deg) scale(.75)", opacity:1, offset:.15},
+             {left:targetX+"px", top:targetY+"px", transform:"rotate(6deg) scale(1)", opacity:1, offset:.78},
+             {left:targetX+"px", top:targetY+"px", transform:"rotate(0deg) scale(.8)", opacity:0}
+           ],{
+             duration:520,
+             delay:delay,
+             fill:"forwards",
+             easing:"ease-out"
+           });
+
+           delay += 135;
+        });
+     }
+
+     setTimeout(()=>{
+        layer.style.display="none";
+        layer.innerHTML="";
+        resolve();
+     }, delay + 450);
+
+   }, 80);
  });
 }
 
@@ -2546,9 +2589,11 @@ function startNewHand(){
     createInitialDiscard();
     gameStats.handsPlayed++;
     log("New hand started");
-    setTimeout(showTurnModal,100);
     document.getElementById("results").innerHTML="";
     updateAll();
+    playOpeningDealAnimation().then(()=>{
+        showTurnModal();
+    });
 }
 
 function createInitialDiscard(){
