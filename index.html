@@ -156,7 +156,7 @@ button:disabled{
     box-shadow:0 3px 8px rgba(0,0,0,.25);
 }
 .tableArea{
-    max-width:1100px;
+    max-width:1400px;
     margin:18px auto;
     display:grid;
     grid-template-columns:1fr 1.5fr 1fr;
@@ -175,7 +175,7 @@ button:disabled{
     display:grid;
     grid-template-columns:repeat(auto-fit, minmax(190px,1fr));
     gap:10px;
-    max-width:1050px;
+    max-width:1400px;
     margin:0 auto;
 }
 .playerBox{
@@ -202,7 +202,7 @@ button:disabled{
     background:white;
     color:black;
     width:100%;
-    max-width:950px;
+    max-width:1400px;
     margin:auto;
     padding:10px;
     border-radius:10px;
@@ -214,7 +214,7 @@ button:disabled{
     background:white;
     color:black;
     width:100%;
-    max-width:1000px;
+    max-width:1400px;
     margin:auto;
     padding:10px;
     border-radius:10px;
@@ -225,7 +225,7 @@ button:disabled{
     background:white;
     color:black;
     width:100%;
-    max-width:600px;
+    max-width:1400px;
     margin:auto;
     padding:10px;
     border-radius:10px;
@@ -408,7 +408,7 @@ th,td{border:1px solid #ccc;padding:7px;text-align:left;}
 .rulesContent{
  background:white;
  color:black;
- max-width:900px;
+ max-width:1400px;
  margin:40px auto;
  padding:20px;
  border-radius:12px;
@@ -461,7 +461,7 @@ th,td{border:1px solid #ccc;padding:7px;text-align:left;}
 .handCompleteContent{
  background:white;
  color:black;
- max-width:500px;
+ max-width:1400px;
  margin:120px auto;
  padding:30px;
  border-radius:16px;
@@ -484,7 +484,7 @@ th,td{border:1px solid #ccc;padding:7px;text-align:left;}
 .gameOverContent{
  background:white;
  color:black;
- max-width:600px;
+ max-width:1400px;
  margin:80px auto;
  padding:30px;
  border-radius:16px;
@@ -502,7 +502,7 @@ th,td{border:1px solid #ccc;padding:7px;text-align:left;}
 .targetContent{
  background:white;
  color:black;
- max-width:500px;
+ max-width:1400px;
  margin:100px auto;
  padding:25px;
  border-radius:16px;
@@ -517,10 +517,10 @@ th,td{border:1px solid #ccc;padding:7px;text-align:left;}
 
 /* v8.0 Poker Table Layout */
 .casinoLayout{
-    max-width:1500px;
+    max-width:1400px;
     margin:18px auto;
     display:grid;
-    grid-template-columns:1fr 220px;
+    grid-template-columns:1fr;
     gap:16px;
     align-items:start;
 }
@@ -626,7 +626,7 @@ th,td{border:1px solid #ccc;padding:7px;text-align:left;}
 .seat{
     position:absolute;
     min-width:180px;
-    max-width:260px;
+    max-width:1400px;
     background:rgba(0,0,0,.72);
     border:1px solid rgba(255,255,255,.38);
     border-radius:12px;
@@ -809,7 +809,7 @@ box-shadow:0 2px 6px rgba(0,0,0,.5);
  z-index:10050;
 }
 .turnModalContent{
- max-width:600px;
+ max-width:1400px;
  margin:120px auto;
  background:white;
  color:black;
@@ -889,7 +889,7 @@ box-shadow:0 2px 6px rgba(0,0,0,.5);
     z-index:10060;
 }
 .streetModalContent{
-    max-width:560px;
+    max-width:1400px;
     margin:130px auto;
     background:white;
     color:black;
@@ -905,7 +905,7 @@ box-shadow:0 2px 6px rgba(0,0,0,.5);
     z-index:10070;
 }
 .actionHelpContent{
-    max-width:560px;
+    max-width:1400px;
     margin:95px auto;
     background:white;
     color:black;
@@ -964,7 +964,7 @@ box-shadow:0 2px 6px rgba(0,0,0,.5);
 }
 .startCard{
     width:100%;
-    max-width:560px;
+    max-width:1400px;
     background:rgba(0,0,0,.72);
     border:2px solid rgba(255,255,255,.35);
     border-radius:22px;
@@ -999,6 +999,25 @@ box-shadow:0 2px 6px rgba(0,0,0,.5);
     opacity:.9;
     font-size:14px;
     margin-top:14px;
+}
+
+
+/* v9.3 Full Width Showdown Results */
+.showdownSection,
+#results,
+.resultsTableWrapper{
+    width:100% !important;
+    max-width:1400px !important;
+    overflow-x:visible !important;
+}
+
+#results table{
+    width:100% !important;
+    table-layout:auto !important;
+}
+
+#results{
+    margin:20px auto !important;
 }
 
 </style>
@@ -1068,7 +1087,7 @@ box-shadow:0 2px 6px rgba(0,0,0,.5);
 </div>
     </div>
     
-<div class="panel" style="max-width:700px;margin:10px auto;display:none;">
+<div class="panel" style="max-width:1400px;margin:10px auto;display:none;">
 <h3>Local Multiplayer Setup</h3>
 Players:
 <select id="playerCountSelect" onchange="updatePlayerCountFromDropdown()">
@@ -1183,9 +1202,16 @@ Target:
         </div>
     </div>
 
-<div class="section"><h3>Showdown Results</h3><div id="results"></div></div>
-<div class="section"><h3>Game Log</h3><div id="log"></div></div>
-<div class="section"><h3>Statistics</h3><div id="stats"></div></div>
+
+
+<div class="section" style="max-width:1400px;margin:25px auto;">
+    <h2 style="margin-bottom:15px;">Showdown Results</h2>
+
+    <h3>Showdown Results</h3>
+    <div id="results"></div>
+</div>
+
+
 
 
 <div id="rulesModal" class="rulesModal">
@@ -1304,7 +1330,7 @@ Target:
 
 
 <div id="mvpModal" class="gameOverModal">
-  <div class="gameOverContent" style="max-width:500px;">
+  <div class="gameOverContent" style="max-width:1400px;">
     <h1>🏆 BEST HAND</h1>
     <div id="mvpBody"></div>
   </div>
