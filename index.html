@@ -950,9 +950,105 @@ box-shadow:0 2px 6px rgba(0,0,0,.5);
     opacity:.9;
 }
 
+
+/* v9.1 Starter Screen */
+.startScreen{
+    position:fixed;
+    inset:0;
+    z-index:20000;
+    background:radial-gradient(circle at center, #167a4a 0%, #0f5132 55%, #083b24 100%);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:22px;
+}
+.startCard{
+    width:100%;
+    max-width:560px;
+    background:rgba(0,0,0,.72);
+    border:2px solid rgba(255,255,255,.35);
+    border-radius:22px;
+    padding:30px;
+    box-shadow:0 18px 45px rgba(0,0,0,.6);
+}
+.startCard label{
+    display:block;
+    margin-top:18px;
+    margin-bottom:7px;
+    font-size:17px;
+    font-weight:900;
+    text-align:left;
+}
+.startCard select{
+    width:100%;
+    padding:13px;
+    border-radius:10px;
+    border:0;
+    font-size:18px;
+    font-weight:800;
+}
+.startButton{
+    width:100%;
+    margin-top:26px;
+    padding:16px 20px;
+    font-size:22px;
+    background:#F1C40F;
+    color:#111;
+}
+.startSubtext{
+    opacity:.9;
+    font-size:14px;
+    margin-top:14px;
+}
+
 </style>
 </head>
 <body>
+
+<div id="startScreen" class="startScreen">
+    <div class="startCard">
+        <div class="pageLogo" style="margin:0 0 20px 0;">
+            <div class="logoAction">ACTION</div>
+            <div class="logoHoldem">HOLD 'EM</div>
+            <div class="logoSuits">
+                <span class="redSuit">♦</span>
+                <span class="blueSuit">♠</span>
+                <span class="redSuit">♥</span>
+                <span class="blueSuit">♣</span>
+            </div>
+        </div>
+
+        <h2 style="margin:8px 0 4px 0;">Game Setup</h2>
+        <div class="startSubtext">Choose your table settings, then start the game.</div>
+
+        <label for="startPlayerCount">How many players?</label>
+        <select id="startPlayerCount">
+            <option value="2">2 Players</option>
+            <option value="3">3 Players</option>
+            <option value="4" selected>4 Players</option>
+            <option value="5">5 Players</option>
+            <option value="6">6 Players</option>
+           
+        </select>
+
+        <label for="startTargetScore">Play to what score?</label>
+        <select id="startTargetScore">
+            <option>300</option>
+            <option>400</option>
+            <option selected>500</option>
+            <option>600</option>
+            <option>700</option>
+            <option>800</option>
+            <option>900</option>
+            <option>1000</option>
+            <option>1250</option>
+            <option>1500</option>
+        </select>
+
+        <button class="startButton" onclick="startGameFromStartScreen()">Start Game</button>
+    </div>
+</div>
+
 
     <div class="pageLogo">
         <div class="logoAction">ACTION</div>
@@ -966,7 +1062,7 @@ box-shadow:0 2px 6px rgba(0,0,0,.5);
 </div>
     </div>
     
-<div class="panel" style="max-width:700px;margin:10px auto;">
+<div class="panel" style="max-width:700px;margin:10px auto;display:none;">
 <h3>Local Multiplayer Setup</h3>
 Players:
 <select id="playerCountSelect" onchange="updatePlayerCountFromDropdown()">
@@ -1285,6 +1381,34 @@ let gameStats={
 };
 
 
+
+function startGameFromStartScreen(){
+    const playerSelect=document.getElementById("startPlayerCount");
+    const targetSelect=document.getElementById("startTargetScore");
+
+    playerCount=parseInt(playerSelect.value,10);
+    targetScore=parseInt(targetSelect.value,10);
+
+    const oldPlayerSelect=document.getElementById("playerCountSelect");
+    const oldTargetSelect=document.getElementById("targetScoreSelect");
+
+    if(oldPlayerSelect) oldPlayerSelect.value=String(playerCount);
+    if(oldTargetSelect) oldTargetSelect.value=String(targetScore);
+
+    gameScores=Array(playerCount).fill(0);
+    finalHandTriggered=false;
+    handAlreadyScored=false;
+    handOver=false;
+
+    const results=document.getElementById("results");
+    if(results) results.innerHTML="";
+
+    const startScreen=document.getElementById("startScreen");
+    if(startScreen) startScreen.style.display="none";
+
+    startNewHand();
+}
+
 function toggleSettings(){
     const content=document.getElementById('settingsContent');
     const btn=document.getElementById('settingsToggleBtn');
@@ -1501,9 +1625,11 @@ function updatePlayerCountFromDropdown(){
 
     gameScores = Array(playerCount).fill(0);
 
-    startNewHand();
-
-    log("Player count changed to " + playerCount + ". New hand started automatically.");
+    const startScreen=document.getElementById("startScreen");
+    if(!startScreen || startScreen.style.display==="none"){
+        startNewHand();
+        log("Player count changed to " + playerCount + ". New hand started automatically.");
+    }
 }
 
 function setupPlayers(){
@@ -3380,8 +3506,8 @@ function updateAll(){
     const discardCountEl=document.getElementById("discardCount");
     if(discardCountEl) discardCountEl.innerText=discardPile.length;
 }
+// Game starts from the starter screen.
 
-startNewHand();
 </script>
 </body>
 </html>
