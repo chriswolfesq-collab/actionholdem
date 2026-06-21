@@ -1022,7 +1022,7 @@ box-shadow:0 2px 6px rgba(0,0,0,.5);
         <div class="startSubtext">Choose your table settings, then start the game.</div>
 
         <label for="startPlayerCount">How many players?</label>
-        <select id="startPlayerCount">
+        <select id="startPlayerCount" onchange="renderPlayerNameInputs()">
             <option value="2">2 Players</option>
             <option value="3">3 Players</option>
             <option value="4" selected>4 Players</option>
@@ -1031,7 +1031,13 @@ box-shadow:0 2px 6px rgba(0,0,0,.5);
            
         </select>
 
-        <label for="startTargetScore">Play to what score?</label>
+        
+<div id="playerNamesContainer">
+    <label>Player Names</label>
+    <div id="playerNameInputs"></div>
+</div>
+
+<label for="startTargetScore">Play to what score?</label>
         <select id="startTargetScore">
             <option>300</option>
             <option>400</option>
@@ -1382,6 +1388,19 @@ let gameStats={
 
 
 
+
+function renderPlayerNameInputs(){
+    const count=parseInt(document.getElementById('startPlayerCount').value,10);
+    const container=document.getElementById('playerNameInputs');
+    if(!container) return;
+
+    let html='';
+    for(let i=0;i<count;i++){
+        html += `<input type="text" id="playerName_${i}" placeholder="Player ${i+1}" value="${playerNames[i]||''}" style="width:100%;padding:10px;margin:6px 0;border-radius:8px;">`;
+    }
+    container.innerHTML=html;
+}
+
 function startGameFromStartScreen(){
     const playerSelect=document.getElementById("startPlayerCount");
     const targetSelect=document.getElementById("startTargetScore");
@@ -1395,7 +1414,18 @@ function startGameFromStartScreen(){
     if(oldPlayerSelect) oldPlayerSelect.value=String(playerCount);
     if(oldTargetSelect) oldTargetSelect.value=String(targetScore);
 
+    
+    for(let i=0;i<playerCount;i++){
+        const el=document.getElementById('playerName_'+i);
+        if(el && el.value.trim()){
+            playerNames[i]=el.value.trim();
+        }else{
+            playerNames[i]='Player '+(i+1);
+        }
+    }
+
     gameScores=Array(playerCount).fill(0);
+    
     finalHandTriggered=false;
     handAlreadyScored=false;
     handOver=false;
@@ -3506,6 +3536,7 @@ function updateAll(){
     const discardCountEl=document.getElementById("discardCount");
     if(discardCountEl) discardCountEl.innerText=discardPile.length;
 }
+renderPlayerNameInputs();
 // Game starts from the starter screen.
 
 </script>
