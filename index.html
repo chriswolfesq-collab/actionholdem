@@ -512,6 +512,15 @@ th,td{border:1px solid #ccc;padding:7px;text-align:left;}
  display:block;
  width:100%;
  margin:8px 0;
+ padding:14px;
+ border-radius:12px;
+ text-align:left;
+ background:#f5f5f5;
+ border:2px solid #ddd;
+}
+.targetBtn:hover{
+ border-color:#F1C40F;
+ transform:translateY(-1px);
 }
 
 
@@ -1460,19 +1469,30 @@ box-shadow:0 2px 6px rgba(0,0,0,.5);
         <h2 style="margin:8px 0 4px 0;">Game Setup</h2>
         <div class="startSubtext">Choose your table settings, then start the game.</div>
 
-        <label for="startPlayerCount">How many players?</label>
-        <select id="startPlayerCount" onchange="renderPlayerNameInputs()">
-            <option value="2">2 Players</option>
-            <option value="3">3 Players</option>
-            <option value="4" selected>4 Players</option>
-            <option value="5">5 Players</option>
-            <option value="6">6 Players</option>
-           
+        <label for="startHumanCount">Human Players</label>
+        <select id="startHumanCount" onchange="updateStartPlayerSetup()">
+            <option value="1" selected>1 Human</option>
+            <option value="2">2 Humans</option>
+            <option value="3">3 Humans</option>
+            <option value="4">4 Humans</option>
+            <option value="5">5 Humans</option>
+            <option value="6">6 Humans</option>
         </select>
+
+        <label for="startAICount">AI Players</label>
+        <select id="startAICount" onchange="updateStartPlayerSetup()">
+            <option value="0">0 AI</option>
+            <option value="1">1 AI</option>
+            <option value="2">2 AI</option>
+            <option value="3" selected>3 AI</option>
+            <option value="4">4 AI</option>
+            <option value="5">5 AI</option>
+        </select>
+        <div id="playerSetupWarning" class="startSubtext" style="color:#ffd54f;"></div>
 
         
 <div id="playerNamesContainer">
-    <label>Player Names</label>
+    <label>Human Player Names</label>
     <div id="playerNameInputs"></div>
 </div>
 
@@ -1542,6 +1562,8 @@ Target:
 
 <br>
 <button onclick="openRules()">📖 How to Play & Rules</button>
+<button id="ambienceToggleBtn" onclick="toggleAmbience()">🔊 Ambience: ON</button>
+<button id="sfxToggleBtn" onclick="toggleSFX()">🔊 SFX: ON</button>
 </div>
 
 
@@ -1576,7 +1598,9 @@ Target:
 
                 <div class="smallNote">During MUST DISCARD, click a card to discard it or play it as an Action Card.</div>
 
-                <div id="revealHandArea" style="margin-bottom:10px;"></div>
+                <div id="revealHandArea" style="margin-bottom:10px;">
+        <button onclick="toggleHandReveal()" id="revealToggleBtn">👁 Reveal Cards</button>
+    </div>
 
                 <div id="handPreview" style="
                     background:rgba(255,255,255,.15);
@@ -1616,6 +1640,7 @@ Target:
                 <h3>Recent Actions</h3>
                 <div class="smallNote">Last 10 actions</div>
                 <div id="recentActionsFeed"><div class="recentActionItem">No actions yet.</div></div>
+                
             </div>
 
         </div>
@@ -1821,6 +1846,53 @@ Target:
 <div id="streetDealLayer"></div>
 <div id="openingDealLayer"></div>
 <script>
+
+function playSound(id,vol){
+ const a=document.getElementById(id);
+ if(!a) return;
+
+ const isAmbience=(id==='roomAmbience');
+
+ if(!isAmbience && typeof sfxEnabled!=='undefined' && !sfxEnabled){
+    return;
+ }
+
+ a.pause();
+ a.currentTime=0;
+ a.volume=vol||0.5;
+ a.play().catch(()=>{});
+}
+function startRoomAmbience(){ playSound('roomAmbience',0.12); }
+
+
+let ambienceEnabled=true;
+let sfxEnabled=true;
+
+function toggleAmbience(){
+    const audio=document.getElementById('roomAmbience');
+    const btn=document.getElementById('ambienceToggleBtn');
+    if(!audio || !btn) return;
+
+    ambienceEnabled=!ambienceEnabled;
+
+    if(ambienceEnabled){
+        audio.volume=0.12;
+        audio.play().catch(()=>{});
+        btn.textContent='🔊 Ambience: ON';
+    }else{
+        audio.pause();
+        btn.textContent='🔇 Ambience: OFF';
+    }
+}
+
+function toggleSFX(){
+    sfxEnabled=!sfxEnabled;
+    const btn=document.getElementById('sfxToggleBtn');
+    if(btn){
+        btn.textContent=sfxEnabled ? '🔊 SFX: ON' : '🔇 SFX: OFF';
+    }
+}
+
 let deck=[];
 let players=[];
 let currentPlayerIndex=0;
@@ -1842,6 +1914,9 @@ let turnsTakenThisRound=0;
 let handRevealed=false;
 let playerNames=['Player 1','Player 2','Player 3','Player 4','Player 5','Player 6','Player 7','Player 8','Player 9','Player 10'];
 let playerCount=4;
+let humanPlayerCount=1;
+let aiPlayerCount=3;
+let aiNames=['RiverRat','ChipBot','All-In Al','PocketBot','The Grinder','Bad Beat Bob'];
 let targetScore=500;
 let finalHandTriggered=false;
 let recentActions=[];
@@ -1859,7 +1934,8 @@ let gameStats={
 
 
 function renderPlayerNameInputs(){
-    const count=parseInt(document.getElementById('startPlayerCount').value,10);
+    const humanSelect=document.getElementById('startHumanCount') || document.getElementById('startPlayerCount');
+    const count=parseInt(humanSelect ? humanSelect.value : playerCount,10);
     const container=document.getElementById('playerNameInputs');
     if(!container) return;
 
@@ -1870,11 +1946,47 @@ function renderPlayerNameInputs(){
     container.innerHTML=html;
 }
 
-function startGameFromStartScreen(){
-    const playerSelect=document.getElementById("startPlayerCount");
+function updateStartPlayerSetup(){
+    const humanSelect=document.getElementById('startHumanCount');
+    const aiSelect=document.getElementById('startAICount');
+    const warning=document.getElementById('playerSetupWarning');
+
+    let humans=parseInt(humanSelect ? humanSelect.value : 4,10);
+    let ai=parseInt(aiSelect ? aiSelect.value : 0,10);
+
+    if(humans + ai > 6){
+        ai=Math.max(0,6-humans);
+        if(aiSelect) aiSelect.value=String(ai);
+    }
+
+    if(humans + ai < 2){
+        ai=1;
+        if(aiSelect) aiSelect.value='1';
+    }
+
+    if(warning){
+        warning.textContent=`Total Players: ${humans + ai} (${humans} human${humans===1?'':'s'}, ${ai} AI)`;
+    }
+
+    renderPlayerNameInputs();
+}
+
+function startGameFromStartScreen(){ startRoomAmbience(); playSound('shuffleDeckSound',0.4);
+    const humanSelect=document.getElementById("startHumanCount");
+    const aiSelect=document.getElementById("startAICount");
     const targetSelect=document.getElementById("startTargetScore");
 
-    playerCount=parseInt(playerSelect.value,10);
+    humanPlayerCount=parseInt(humanSelect ? humanSelect.value : 4,10);
+    aiPlayerCount=parseInt(aiSelect ? aiSelect.value : 0,10);
+
+    if(humanPlayerCount + aiPlayerCount > 6){
+        aiPlayerCount=Math.max(0,6-humanPlayerCount);
+    }
+    if(humanPlayerCount + aiPlayerCount < 2){
+        aiPlayerCount=1;
+    }
+
+    playerCount=humanPlayerCount + aiPlayerCount;
     targetScore=parseInt(targetSelect.value,10);
 
     const oldPlayerSelect=document.getElementById("playerCountSelect");
@@ -1883,8 +1995,7 @@ function startGameFromStartScreen(){
     if(oldPlayerSelect) oldPlayerSelect.value=String(playerCount);
     if(oldTargetSelect) oldTargetSelect.value=String(targetScore);
 
-    
-    for(let i=0;i<playerCount;i++){
+    for(let i=0;i<humanPlayerCount;i++){
         const el=document.getElementById('playerName_'+i);
         if(el && el.value.trim()){
             playerNames[i]=el.value.trim();
@@ -1893,8 +2004,12 @@ function startGameFromStartScreen(){
         }
     }
 
+    for(let i=0;i<aiPlayerCount;i++){
+        playerNames[humanPlayerCount+i]=aiNames[i] || ('AI Player '+(i+1));
+    }
+
     gameScores=Array(playerCount).fill(0);
-    
+
     finalHandTriggered=false;
     handAlreadyScored=false;
     handOver=false;
@@ -1944,6 +2059,206 @@ document.getElementById('rulesModal').style.display='block';
 function closeRules(){
 document.getElementById('rulesModal').style.display='none';
 }
+
+
+function buildTargetPreviewCard(i){
+ const p=players[i];
+ const score=(gameScores[i]||0);
+ const remaining=Math.max(0,targetScore-score);
+ const handSize=(p.hand||[]).length;
+ const skipCount=(p.effects && p.effects.skipTurns) ? p.effects.skipTurns : 0;
+
+ return `<div>
+ <strong>${p.name}</strong><br>
+ Score: ${score}<br>
+ Remaining: ${remaining}<br>
+ Cards: ${handSize}
+ ${skipCount>0?'<br>⏭️ Skip x'+skipCount:''}
+ </div>`;
+}
+
+function sleep(ms){
+    return new Promise(resolve=>setTimeout(resolve,ms));
+}
+
+function isAIPlayer(index=currentPlayerIndex){
+    return players[index] && players[index].isAI;
+}
+
+function chooseAITarget(excludeSelf=true){
+    const candidates=players
+        .map((p,i)=>({p,i,score:gameScores[i]||0,handSize:(p.hand||[]).length}))
+        .filter(x=>!excludeSelf || x.i!==currentPlayerIndex);
+
+    if(!candidates.length) return currentPlayerIndex;
+
+    candidates.sort((a,b)=>{
+        if(b.score!==a.score) return b.score-a.score;
+        return b.handSize-a.handSize;
+    });
+    return candidates[0].i;
+}
+
+function aiChooseDiscardIndex(player){
+    let actionIndexes=[];
+    for(let i=0;i<player.hand.length;i++){
+        if(player.hand[i].category==="action") actionIndexes.push(i);
+    }
+    if(actionIndexes.length){
+        actionIndexes.sort((a,b)=>(player.hand[a].penalty||0)-(player.hand[b].penalty||0));
+        return actionIndexes[0];
+    }
+
+    let weakestIndex=0;
+    let weakestValue=99;
+    const rankMap={"2":2,"3":3,"4":4,"5":5,"6":6,"7":7,"8":8,"9":9,"10":10,"J":11,"Q":12,"K":13,"A":14};
+
+    player.hand.forEach((card,i)=>{
+        if(card.category==="wild") return;
+        let value=8;
+        if(card.category==="standard"){
+            const rankText=card.name.slice(0,-1);
+            value=rankMap[rankText] || 8;
+        }
+        if(value<weakestValue){
+            weakestValue=value;
+            weakestIndex=i;
+        }
+    });
+
+    return weakestIndex;
+}
+
+
+function isAIActionPlayable(card){
+    if(!card || card.category!=="action") return false;
+    const a=card.action || "";
+
+    if(a==="bonus_self" && currentPlayer() && (currentPlayer().hand||[]).length>=3){
+        return false;
+    }
+
+    if(a==="bonus_targeted"){
+        const target=chooseAITarget(true);
+        if(!canReceiveBonusCard(target)){
+            return false;
+        }
+    }
+
+    if(a==="change_community" && (phase==="PRE-FLOP" || phase==="PRE_FLOP")){
+        return false;
+    }
+    return true;
+}
+
+function aiChooseActionCardIndex(player){
+    const preferred=[
+        "bonus_self","burn_targeted","skip","trade_hands","face_up_targeted",
+        "peek_targeted","full_reset_self","bonus_targeted","burn_all","pass_left","pass_right"
+    ];
+
+    for(const action of preferred){
+        const idx=player.hand.findIndex(c=>{
+            if(c.category!=="action" || c.action!==action) return false;
+            try{
+                return isAIActionPlayable(c) && canPlayActionCard(c).valid;
+            }catch(e){
+                return false;
+            }
+        });
+        if(idx>=0) return idx;
+    }
+    return -1;
+}
+
+
+function aiGetLegalDiscardIndexes(player){
+    const legal=[];
+    for(let i=0;i<player.hand.length;i++){
+        const card=player.hand[i];
+
+        if(card.category==="action"){
+            try{
+                if(isAIActionPlayable(card) && canPlayActionCard(card).valid){
+                    legal.push(i);
+                }
+            }catch(e){}
+            continue;
+        }
+
+        if(card.id!==lastDrawnFromDiscardId){
+            legal.push(i);
+        }
+    }
+    return legal;
+}
+
+async function runAITurnIfNeeded(){
+    if(handOver) return;
+    const player=currentPlayer();
+    if(!player || !player.isAI) return;
+
+    handRevealed=false;
+    updateAll();
+
+    log("🤖 "+player.name+" is thinking...");
+    await sleep(800);
+
+    if(turnState==="MUST_DRAW"){
+        const top=discardPile[discardPile.length-1];
+        if(top && top.category!=="action" && Math.random()<0.35){
+            drawFromDiscard();
+        }else{
+            drawFromDeck();
+        }
+        await sleep(600);
+    }
+
+    if(turnState!=="MUST_DISCARD" || handOver) return;
+
+    for(let attempt=0; attempt<12 && turnState==="MUST_DISCARD" && !handOver; attempt++){
+        const beforeHand=player.hand.length;
+
+        const actionIndex=aiChooseActionCardIndex(player);
+
+        if(actionIndex>=0 && Math.random()<0.65){
+            try{ await discardCard(actionIndex,true); }catch(e){}
+        }else{
+            const legalMoves=aiGetLegalDiscardIndexes(player);
+
+            if(legalMoves.length){
+                const discardIndex=legalMoves.includes(aiChooseDiscardIndex(player))
+                    ? aiChooseDiscardIndex(player)
+                    : legalMoves[0];
+
+                try{ await discardCard(discardIndex,true); }catch(e){}
+            }
+        }
+
+        await sleep(150);
+
+        if(turnState!=="MUST_DISCARD" || handOver){
+            return;
+        }
+
+        const legalDiscard=player.hand.findIndex(c=>c.id!==lastDrawnFromDiscardId);
+        if(legalDiscard>=0){
+            try{ await discardCard(legalDiscard,true); }catch(e){}
+        }
+
+        await sleep(150);
+
+        if(turnState!=="MUST_DISCARD" || handOver){
+            return;
+        }
+    }
+
+    const emergency=player.hand.findIndex(c=>c.id!==lastDrawnFromDiscardId);
+    if(emergency>=0){
+        try{ await discardCard(emergency,true); }catch(e){}
+    }
+}
+
 
 function currentPlayer(){ return players[currentPlayerIndex]; }
 
@@ -2031,6 +2346,10 @@ function playActionAnimation(card, playerName){
 
 
 async function playUniqueActionAnimation(card){
+ if(card && card.action){
+   if(card.action.includes('burn')) playSound('burnSound',0.55);
+   else if(card.action==='trade_hands' || card.action.includes('full_reset')) playSound('tradeSound',0.55);
+ }
  return new Promise(resolve=>{
    const overlay=document.getElementById('fxOverlay');
    const center=document.getElementById('fxCenter');
@@ -2227,7 +2546,8 @@ function playTableMotionAnimation(card, playerName){
 }
 
 
-function playOpeningDealAnimation(){
+function playOpeningDealAnimation(){ playSound('shuffleSound',0.5);
+ playShuffleSound();
  return new Promise(resolve=>{
    const layer=document.getElementById("openingDealLayer");
    if(!layer){ resolve(); return; }
@@ -2297,7 +2617,8 @@ function playOpeningDealAnimation(){
  });
 }
 
-function playStreetDealAnimation(street){
+function playStreetDealAnimation(street){ playSound('flipSound',0.5);
+ playCardFlipSound();
  return new Promise(resolve=>{
    const layer=document.getElementById('streetDealLayer');
    if(!layer){ resolve(); return; }
@@ -2375,19 +2696,9 @@ function actionCardDescription(card){
     return descriptions[card.action] || "Play this Action Card.";
 }
 
-function showStreetModal(title, body){
-    const modal=document.getElementById("streetModal");
-    if(!modal) return;
-    document.getElementById("streetModalTitle").innerText=title;
-    document.getElementById("streetModalBody").innerText=body;
-    modal.style.display="block";
-}
+function showStreetModal(){ return; }
 
-function closeStreetModal(){
-    const modal=document.getElementById("streetModal");
-    if(modal) modal.style.display="none";
-    showTurnModal();
-}
+function closeStreetModal(){ return; }
 
 function showActionHelpModal(card,index){
     pendingActionCardIndex=index;
@@ -2419,18 +2730,31 @@ function confirmActionCard(){
 
 function showTurnModal(){
     if(handOver) return;
-    const phaseText=phase;
-    const nextAction=getNextStepText();
 
-    document.getElementById("turnModalPlayer").innerText=currentPlayer().name;
-    document.getElementById("turnModalPhase").innerText=phaseText+" • "+currentPlayer().name+"'s Turn";
-    document.getElementById("turnModalAction").innerText="Next Step: "+nextAction+" — "+getWhatHappensNextText();
-    document.getElementById("turnModal").style.display="block";
+    const modal=document.getElementById("turnModal");
+    if(modal) modal.style.display="none";
+
+    if(isAIPlayer()){
+        handRevealed=false;
+        updateAll();
+        setTimeout(runAITurnIfNeeded,500);
+        return;
+    }
+
+    updateAll();
 }
 
 function closeTurnModalAndReveal(){
-    document.getElementById("turnModal").style.display="none";
     revealCurrentHand();
+}
+
+function toggleHandReveal(){
+    handRevealed=!handRevealed;
+    const btn=document.getElementById("revealToggleBtn");
+    if(btn){
+        btn.innerText=handRevealed ? "🙈 Hide Cards" : "👁 Reveal Cards";
+    }
+    updateAll();
 }
 
 function log(message){
@@ -2507,7 +2831,7 @@ function updatePlayerCountFromDropdown(){
 
     playerCount = newCount;
 
-    gameScores = Array(playerCount).fill(0);
+    // gameScores preserved when changing player count during a game;
 
     const startScreen=document.getElementById("startScreen");
     if(!startScreen || startScreen.style.display==="none"){
@@ -2561,8 +2885,6 @@ function startNewHand(){
     handRevealed = false;
     turnsTakenThisRound = 0;
 
-    updatePlayerCountFromDropdown();
-
     while(gameScores.length < playerCount){
         gameScores.push(0);
     }
@@ -2578,6 +2900,7 @@ function startNewHand(){
         players.push({
             name: playerNames[i] || ("Player "+(i+1)),
             hand: [],
+            isAI: i >= humanPlayerCount,
             effects:{faceUp:false, skip:false, bonus:false}
         });
     }
@@ -2626,11 +2949,11 @@ function moveToNextAvailablePlayer(){
 
         advanceToNextPlayer();
 
-        if((currentPlayer().effects.skip||0) > 0){
+        if(currentPlayer().effects.skip){
 
             log(currentPlayer().name+" was skipped.");
 
-            currentPlayer().effects.skip--;
+            currentPlayer().effects.skip=false;
 
             turnsTakenThisRound++;
 
@@ -2788,7 +3111,7 @@ function autoAdvanceAfterDiscard(){
 }
 
 
-function drawFromDeck(){
+function drawFromDeck(){ playSound('drawDeckSound',0.45);
     if(handOver){ alert("Hand is over. Start the next hand."); return; }
 
     if(turnState!=="MUST_DRAW"){ alert("You must discard before drawing again."); return; }
@@ -2801,7 +3124,7 @@ function drawFromDeck(){
     updateAll();
 }
 
-function drawFromDiscard(){
+function drawFromDiscard(){ playSound('drawDiscardSound',0.45);
     if(handOver){ alert("Hand is over. Start the next hand."); return; }
 
     if(turnState!=="MUST_DRAW"){ alert("You must discard before drawing again."); return; }
@@ -2820,6 +3143,10 @@ function drawFromDiscard(){
 let targetSelectionCallback=null;
 
 function chooseTarget(excludeSelf=true){
+    if(isAIPlayer()){
+        return Promise.resolve(chooseAITarget(excludeSelf));
+    }
+
     const modal=document.getElementById('targetModal');
     const buttons=document.getElementById('targetButtons');
 
@@ -2832,7 +3159,7 @@ function chooseTarget(excludeSelf=true){
 
             const btn=document.createElement('button');
             btn.className='targetBtn';
-            btn.textContent=p.name;
+            btn.innerHTML=buildTargetPreviewCard(i);
             btn.onclick=()=>{
                 modal.style.display='none';
                 resolve(i);
@@ -2878,16 +3205,21 @@ function burnRandomCardFromPlayer(playerIndex){
 
 async function chooseCommunityCard(){
 
+    const availableCards=[];
+
+    flop.forEach((card,index)=>availableCards.push({label:'Flop '+(index+1)+': '+card.name,area:'flop',index:index}));
+    if(turnCard) availableCards.push({label:'Turn: '+turnCard.name,area:'turn',index:0});
+    if(riverCard) availableCards.push({label:'River: '+riverCard.name,area:'river',index:0});
+
+    if(isAIPlayer()){
+        if(!availableCards.length) return null;
+        return availableCards[Math.floor(Math.random()*availableCards.length)];
+    }
+
     return new Promise(resolve=>{
         const modal=document.getElementById('targetModal');
         const buttons=document.getElementById('targetButtons');
         buttons.innerHTML='';
-
-        const availableCards=[];
-
-        flop.forEach((card,index)=>availableCards.push({label:'Flop '+(index+1)+': '+card.name,area:'flop',index:index}));
-        if(turnCard) availableCards.push({label:'Turn: '+turnCard.name,area:'turn',index:0});
-        if(riverCard) availableCards.push({label:'River: '+riverCard.name,area:'river',index:0});
 
         availableCards.forEach(item=>{
             const btn=document.createElement('button');
@@ -3117,9 +3449,27 @@ function applyBonusToPlayer(playerIndex){
 }
 
 
+
+function canReceiveBonusCard(playerIndex){
+    const target=players[playerIndex];
+    if(!target) return false;
+    return (target.hand || []).length < 3;
+}
+
+function getBonusBlockedMessage(playerIndex){
+    const target=players[playerIndex];
+    const name=target ? target.name : "That player";
+    return name + " already has 3 cards and cannot receive another Bonus Card.";
+}
+
+
 function canPlayActionCard(card){
 
-    if(card.action==="change_community"){
+    
+    if(card && card.action==="bonus_self" && currentPlayer() && (currentPlayer().hand||[]).length>=3){
+        return {valid:false, reason:"You already have 3 cards and cannot receive another Bonus Card."};
+    }
+if(card.action==="change_community"){
         const communityCount = flop.length + (turnCard ? 1 : 0) + (riverCard ? 1 : 0);
         if(communityCount===0){
             return {valid:false, reason:"No community cards have been revealed yet."};
@@ -3166,7 +3516,9 @@ async function resolveActionCard(card){
     if(card.action==="peek_targeted"){
         const idx=await chooseTarget(true);
         if(idx===null) return false;
-        alert(players[idx].name+"'s hand: "+players[idx].hand.map(c=>c.name).join(", "));
+        if(!isAIPlayer()){
+            alert(players[idx].name+"'s hand: "+players[idx].hand.map(c=>c.name).join(", "));
+        }
         log(currentPlayer().name+" peeked at "+players[idx].name+"'s hand.");
         return true;
     }
@@ -3188,7 +3540,7 @@ async function resolveActionCard(card){
     if(card.action==="skip"){
         const idx=await chooseTarget(true);
         if(idx===null) return false;
-        players[idx].effects.skip=(players[idx].effects.skip||0)+1;
+        players[idx].effects.skip=true;
         log(players[idx].name+" will lose their next turn.");
         return true;
     }
@@ -3308,7 +3660,12 @@ async function resolveActionCard(card){
 
     if(card.action==="bonus_self"){
 
-        return applyBonusToPlayer(currentPlayerIndex);
+        
+        if(!canReceiveBonusCard(currentPlayerIndex)){
+            alert(getBonusBlockedMessage(currentPlayerIndex));
+            return false;
+        }
+return applyBonusToPlayer(currentPlayerIndex);
     }
 
     if(card.action==="bonus_targeted"){
@@ -3570,13 +3927,17 @@ function cardHtml(card,clickAction=""){
 
 function renderScoreboard(){
 
-    let html="<table><tr><th>Player</th><th>Score</th></tr>";
+    let html="<table><tr><th>Player</th><th>Type</th><th>Score</th><th>Needed</th></tr>";
 
     players.forEach((player,index)=>{
+        const score=gameScores[index] || 0;
+        const needed=Math.max(0,targetScore-score);
         html += `
             <tr>
                 <td>${player.name}</td>
-                <td><strong>${gameScores[index] || 0}</strong></td>
+                <td>${player.isAI ? "🤖 AI" : "👤 Human"}</td>
+                <td><strong>${score}</strong></td>
+                <td>${needed}</td>
             </tr>
         `;
     });
@@ -3630,9 +3991,9 @@ function renderPlayers(){
 
         html+=`
             <div class="seat seat-${i} ${isCurrent ? "currentPlayer" : ""}">
-                <div class="seatAvatar">👤</div>${i===dealerIndex?'<div class="dealerButton">D</div>':""}
+                <div class="seatAvatar">${p.isAI ? "🤖" : "👤"}</div>${i===dealerIndex?'<div class="dealerButton">D</div>':""}
                 <div class="seatHeader">
-                    <div>${isCurrent ? "▶ " : ""}${p.name}</div>
+                    <div>${isCurrent ? "▶ " : ""}${p.name} ${p.isAI ? "🤖" : ""}</div>
                     <div class="seatScore">$${gameScores[i] || 0}</div>
                 </div>
                 <div class="seatCards">${cards}</div>
@@ -4409,6 +4770,45 @@ function updateAll(){
 renderPlayerNameInputs();
 // Game starts from the starter screen.
 
+
+function playCardFlipSound(){
+  const s=document.getElementById('cardFlipSound');
+  if(!s) return;
+  s.currentTime=0;
+  s.volume=0.5;
+  s.play().catch(()=>{});
+}
+
+function playShuffleSound(){
+  const s=document.getElementById('shuffleSound');
+  if(!s) return;
+  s.currentTime=0;
+  s.volume=0.4;
+  s.play().catch(()=>{});
+}
+
+function startRoomAmbience(){
+  const s=document.getElementById('roomAmbience');
+  if(!s) return;
+  s.volume=0.15;
+  s.play().catch(()=>{});
+}
+
+
+window.addEventListener('DOMContentLoaded',()=>{ updateStartPlayerSetup(); });
 </script>
+
+<audio id="roomAmbience" loop>
+  <source src="freesound_community-poker-room-33521.mp3" type="audio/mpeg">
+</audio>
+
+<audio id="cardFlipSound">
+  <source src="freesound_community-shuffleandcardflip1-40942.mp3" type="audio/mpeg">
+</audio>
+
+<audio id="shuffleSound">
+  <source src="freesound_community-shuffling-cards-01-86984.mp3" type="audio/mpeg">
+</audio>
+
 </body>
 </html>
