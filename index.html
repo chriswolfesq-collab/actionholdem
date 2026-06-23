@@ -2020,6 +2020,7 @@ function startGameFromStartScreen(){ startRoomAmbience(); playSound('shuffleDeck
     const startScreen=document.getElementById("startScreen");
     if(startScreen) startScreen.style.display="none";
 
+    updateRevealButtonVisibility();
     startNewHand();
 }
 
@@ -2746,6 +2747,20 @@ function showTurnModal(){
 
 function closeTurnModalAndReveal(){
     revealCurrentHand();
+}
+
+
+function updateRevealButtonVisibility(){
+    const btn=document.getElementById('revealToggleBtn');
+    if(!btn) return;
+
+    if(humanPlayerCount===1){
+        handRevealed=true;
+        btn.style.display='none';
+    }else{
+        btn.style.display='inline-block';
+        btn.innerText=handRevealed ? '🙈 Hide Cards' : '👁 Reveal Cards';
+    }
 }
 
 function toggleHandReveal(){
@@ -4740,7 +4755,26 @@ function updateTurnGuide(){
 }
 
 
+
+function shouldRevealPlayerHand(playerIndex, player){
+    if(handOver) return true;
+
+    if(player && player.effects && player.effects.faceUp){
+        return true;
+    }
+
+    if(humanPlayerCount===1){
+        return !player.isAI && playerIndex===currentPlayerIndex;
+    }
+
+    return handRevealed && !player.isAI && playerIndex===currentPlayerIndex;
+}
+
 function updateAll(){
+    if(humanPlayerCount===1 && currentPlayer() && !currentPlayer().isAI){
+        handRevealed=true;
+    }
+    updateRevealButtonVisibility();
     renderScoreboard();
     renderPlayers();
     renderHand();
