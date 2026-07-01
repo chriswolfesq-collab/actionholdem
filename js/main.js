@@ -1,4 +1,4 @@
-function playSound(id,vol){
+﻿function playSound(id,vol){
     // Compatibility wrapper. New code should call AudioManager.play(category).
     const map = {
         roomAmbience: "ambience",

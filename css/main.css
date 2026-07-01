@@ -1,3 +1,4 @@
+﻿@charset "UTF-8";
 :root{
     --felt:#0f5132;
     --felt-dark:#083b24;
@@ -1535,5 +1536,62 @@ box-shadow:0 2px 6px rgba(0,0,0,.5);
     border-radius:999px;
     padding:2px 6px;
     margin-top:3px;
+}
+
+
+/* ============================================================
+   v7.1 Phone layout pass
+   Fits the table, community cards, and scoreboard on small
+   screens without horizontal scrolling. Applies on top of the
+   existing max-width:1100px reflow.
+   ============================================================ */
+@media(max-width:560px){
+    body{padding:8px;}
+
+    /* Header logo scales down */
+    .pageLogo{margin:6px 0 12px 0;}
+    .pageLogo .logoAction{font-size:34px;}
+    .pageLogo .logoHoldem{font-size:20px;}
+    .pageLogo .logoSuits{font-size:20px;letter-spacing:8px;}
+
+    /* Tighter buttons so control rows wrap cleanly */
+    button{padding:9px 12px;font-size:14px;margin:4px;}
+
+    /* Scoreboard fits without overflow */
+    #scoreboard{padding:6px;overflow-x:auto;}
+    #scoreboard th,#scoreboard td{padding:5px 6px;font-size:13px;}
+
+    /* Thinner table frame gives the cards more room */
+    .pokerTable{border-width:12px;min-height:auto;padding-bottom:14px;}
+
+    /* Community street labels: proportional and matched to the card row
+       so RIVER no longer runs off the right edge */
+    .boardStreetLabels{
+        grid-template-columns:3fr 1fr 1fr;
+        gap:6px;
+        font-size:10px;
+        max-width:300px;
+        margin:0 auto;
+    }
+    .boardStreetLabel{padding:3px 4px;}
+
+    /* Shrink community cards so all five sit in one tidy row */
+    #communityRow{gap:6px !important;}
+    #communityRow #flop,
+    #communityRow #turn,
+    #communityRow #river{display:flex;gap:6px;}
+    .communityCenter .card{
+        width:54px;min-width:54px;
+        height:78px;min-height:78px;
+        margin:0;
+        padding:4px;
+    }
+    .communityCenter .centerSuit{font-size:26px;}
+    .communityCenter .cardCorner{font-size:11px;top:4px;left:4px;}
+    .communityCenter .cardCorner.bottomRight{bottom:4px;right:4px;}
+
+    /* Start screen padding trimmed */
+    .startScreen{padding:12px;}
+    .startCard{padding:20px;}
 }
 
