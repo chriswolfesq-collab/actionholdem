@@ -1,146 +1,395 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Morning Me</title>
+<title>Action Hold 'Em v7.0</title>
 <link rel="stylesheet" href="css/main.css">
 </head>
 <body>
-<a class="dashboard-link" href="https://chriswolfesq-collab.github.io/dashboard/" aria-label="Back to Wolf Games dashboard">Wolf Games</a>
-<main class="app-shell">
-    <section class="hero-band">
-        <div class="hero-copy">
-            <p class="eyebrow">Draft until daylight</p>
-            <h1>Morning Me</h1>
-            <p class="hero-subtitle">A calmer send button for nights when future-you deserves a veto.</p>
-        </div>
-        <div class="status-strip" aria-live="polite">
-            <div>
-                <span class="metric-label">Mode</span>
-                <strong id="riskModeLabel">Checking</strong>
-            </div>
-            <div>
-                <span class="metric-label">Protected</span>
-                <strong id="protectedCountLabel">0</strong>
-            </div>
-            <div>
-                <span class="metric-label">Held</span>
-                <strong id="heldCountLabel">0</strong>
+
+<div id="startScreen" class="startScreen">
+    <div class="startCard">
+        <div class="pageLogo" style="margin:0 0 20px 0;">
+            <div class="logoAction">ACTION</div>
+            <div class="logoHoldem">HOLD 'EM</div>
+            <div class="logoSuits">
+                <span class="redSuit">♦</span>
+                <span class="blueSuit">♠</span>
+                <span class="redSuit">♥</span>
+                <span class="blueSuit">♣</span>
             </div>
         </div>
-    </section>
 
-    <section class="workspace-grid">
-        <aside class="settings-panel">
-            <div class="panel-heading">
-                <h2>Guardrails</h2>
-                <button class="icon-button" id="resetDemoBtn" type="button" aria-label="Reset demo" title="Reset demo">
-                    <span aria-hidden="true">Reset</span>
-                </button>
+        <h2 style="margin:8px 0 4px 0;">Game Setup</h2>
+        <div class="startSubtext">Choose your table settings, then start the game.</div>
+
+        <label for="startHumanCount">Human Players</label>
+        <select id="startHumanCount" onchange="updateStartPlayerSetup()">
+            <option value="1" selected>1 Human</option>
+            <option value="2">2 Humans</option>
+            <option value="3">3 Humans</option>
+            <option value="4">4 Humans</option>
+            <option value="5">5 Humans</option>
+            <option value="6">6 Humans</option>
+        </select>
+
+        <label for="startAICount">AI Players</label>
+        <select id="startAICount" onchange="updateStartPlayerSetup()">
+            <option value="0">0 AI</option>
+            <option value="1">1 AI</option>
+            <option value="2">2 AI</option>
+            <option value="3" selected>3 AI</option>
+            <option value="4">4 AI</option>
+            <option value="5">5 AI</option>
+        </select>
+        <div id="playerSetupWarning" class="startSubtext" style="color:#ffd54f;"></div>
+
+        <label for="startAIDifficulty">AI Difficulty</label>
+        <select id="startAIDifficulty">
+            <option value="random" selected>🎲 Random</option>
+            <option value="easy">🟢 Easy</option>
+            <option value="normal">🔵 Normal</option>
+            <option value="hard">🔴 Hard</option>
+            <option value="expert">⚫ Expert</option>
+        </select>
+        <div class="startSubtext">Difficulty changes how often AI uses action cards, how well it targets opponents, and how smartly it discards.</div>
+
+        
+<div id="playerNamesContainer">
+    <label>Human Player Names</label>
+    <div id="playerNameInputs"></div>
+</div>
+
+<label for="startTargetScore">Play to what score?</label>
+        <select id="startTargetScore">
+            <option>300</option>
+            <option>400</option>
+            <option selected>500</option>
+            <option>600</option>
+            <option>700</option>
+            <option>800</option>
+            <option>900</option>
+            <option>1000</option>
+            <option>1250</option>
+            <option>1500</option>
+        </select>
+
+        <button class="startButton" onclick="startGameFromStartScreen()">Start Game</button>
+    </div>
+</div>
+
+
+    <div class="pageLogo">
+        <div class="logoAction">ACTION</div>
+        <div class="logoHoldem">HOLD 'EM</div>
+        <div class="logoSuits">
+    <span class="redSuit">♦</span>
+    <span class="blueSuit">♠</span>
+    <span class="redSuit">♥</span>
+    <span class="blueSuit">♣</span>
+    
+</div>
+    </div>
+    
+<div class="controls">
+
+
+<br>
+<button onclick="openRules()">📖 How to Play & Rules</button>
+<button id="ambienceToggleBtn" onclick="toggleAmbience()">🔊 Ambience: ON</button>
+<button id="sfxToggleBtn" onclick="toggleSFX()">🔊 SFX: ON</button>
+</div>
+
+
+<div class="section"><h3>Scoreboard</h3><div id="scoreboard"></div></div>
+
+
+<div class="casinoLayout">
+
+    <div class="tableCenterStack">
+        <div class="pokerTable">
+            <div id="players" class="seatLayer"></div>
+
+            <div class="communityCenter">
+                <div class="communityLabel">COMMUNITY CARDS</div>
+                <div class="boardStreetLabels"><div class="boardStreetLabel">FLOP</div><div class="boardStreetLabel">TURN</div><div class="boardStreetLabel">RIVER</div></div>
+                <div id="communityRow">
+                    <div id="flop"></div>
+                    <div id="turn"></div>
+                    <div id="river"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="controlPanel">
+            <div class="currentHandPanel">
+                <h3>Current Player Hand</h3>
+
+                <div id="turnGuide" style="background:rgba(241,196,15,.2);border:2px solid #F1C40F;border-radius:10px;padding:12px;margin-bottom:10px;text-align:center;">
+                    <div id="guidePhase" style="font-size:18px;font-weight:900;margin-bottom:6px;"></div>
+                    <div id="guideAction" style="font-size:16px;"></div>
+                </div>
+
+                <div class="smallNote">During MUST DISCARD, click a card to discard it or play it as an Action Card.</div>
+
+                <div id="revealHandArea" style="margin-bottom:10px;">
+        <button onclick="toggleHandReveal()" id="revealToggleBtn">👁 Reveal Cards</button>
+    </div>
+
+                <div id="handPreview" style="
+                    background:rgba(255,255,255,.15);
+                    border:1px solid rgba(255,255,255,.35);
+                    border-radius:12px;
+                    padding:12px;
+                    margin-bottom:12px;
+                    font-size:16px;
+                    font-weight:bold;
+                    display:none;
+                "></div>
+
+                <div id="hand"></div>
             </div>
 
-            <label class="switch-row">
-                <span>
-                    <strong>Protection</strong>
-                    <small>Drafts may be held during the risky window.</small>
-                </span>
-                <input id="protectionToggle" type="checkbox" checked>
-            </label>
+            
+<div class="quickButtons">
+                <button id="drawBtn" onclick="drawFromDeck()">Draw From Deck</button>
+                <div id="drawDeckReason" class="buttonReason"></div>
 
-            <div class="field-row two-columns">
-                <label>
-                    <span>From</span>
-                    <input id="startTimeInput" type="time" value="22:00">
-                </label>
-                <label>
-                    <span>Until</span>
-                    <input id="endTimeInput" type="time" value="06:00">
-                </label>
-            </div>
+                <button id="drawDiscardBtn" onclick="drawFromDiscard()">Draw From Discard</button>
+                <div id="drawDiscardReason" class="buttonReason"></div>
 
-            <label class="field-row">
-                <span>Delay</span>
-                <select id="delaySelect">
-                    <option value="30">30 minutes</option>
-                    <option value="120" selected>2 hours</option>
-                    <option value="480">8 hours</option>
-                </select>
-            </label>
+                <button id="nextHandBtn" onclick="startNewHand()">Start Next Hand</button>
+                <div id="nextHandReason" class="buttonReason"></div>
 
-            <div class="field-row">
-                <span class="field-title">Override Check</span>
-                <div class="segmented-control" role="group" aria-label="Override check strength">
-                    <button type="button" class="segment active" data-check="soft">Soft</button>
-                    <button type="button" class="segment" data-check="steady">Steady</button>
-                    <button type="button" class="segment" data-check="strict">Strict</button>
+                <div style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.25);">
+                    <div><strong>Deck:</strong> <span id="deckCount">0</span></div>
+                    <div class="discardLabel">TOP DISCARD</div>
+                    <div style="margin-top:4px;"><strong>Discard:</strong> <span id="discardCount">0</span></div>
+                    <div id="discard" class="miniDiscardCard" style="margin:8px auto;"></div>
+                    <div><strong>Burn:</strong> <span id="burnCount">0</span></div>
                 </div>
             </div>
 
-            <div class="contact-box">
-                <div class="contact-box-header">
-                    <h3>Protected Contacts</h3>
-                    <span id="contactBadge">0</span>
-                </div>
-                <form id="contactForm" class="add-contact">
-                    <input id="contactNameInput" type="text" autocomplete="off" placeholder="Name">
-                    <button type="submit">Add</button>
-                </form>
-                <div id="contactList" class="contact-list"></div>
+            <div class="rightRail">
+                <h3>Recent Actions</h3>
+                <div class="smallNote">Last 10 actions</div>
+                <div id="recentActionsFeed"><div class="recentActionItem">No actions yet.</div></div>
+                
             </div>
-        </aside>
 
-        <section class="phone-panel" aria-label="Message composer">
-            <div class="phone-frame">
-                <div class="phone-topbar">
-                    <div>
-                        <span class="metric-label">Recipient</span>
-                        <select id="recipientSelect"></select>
-                    </div>
-                    <span id="recipientRiskPill" class="risk-pill">Protected</span>
-                </div>
-
-                <div id="conversationPreview" class="conversation-preview"></div>
-
-                <form id="messageForm" class="composer">
-                    <textarea id="messageInput" rows="5" placeholder="Type the message you might want morning-you to review..."></textarea>
-                    <div class="composer-footer">
-                        <div id="riskScore" class="risk-score">Risk: 0</div>
-                        <button type="submit" class="primary-button">Send</button>
-                    </div>
-                </form>
-            </div>
-        </section>
-
-        <section class="queue-panel">
-            <div class="tabs" role="tablist" aria-label="Message views">
-                <button type="button" class="tab active" data-tab="held">Held</button>
-                <button type="button" class="tab" data-tab="sent">Sent</button>
-                <button type="button" class="tab" data-tab="review">Morning</button>
-            </div>
-            <div id="queueContent" class="queue-content"></div>
-        </section>
-    </section>
-</main>
-
-<dialog id="challengeDialog" class="challenge-dialog">
-    <form method="dialog" class="challenge-card">
-        <div>
-            <p class="eyebrow">Override check</p>
-            <h2 id="challengeTitle">One quick pause</h2>
-            <p id="challengePrompt" class="challenge-prompt"></p>
         </div>
-        <input id="challengeInput" type="text" autocomplete="off">
-        <p id="challengeFeedback" class="challenge-feedback" aria-live="polite"></p>
-        <div class="dialog-actions">
-            <button type="button" id="holdInsteadBtn">Hold</button>
-            <button type="button" id="challengeSendBtn" class="primary-button">Send Now</button>
-        </div>
-    </form>
-</dialog>
+    </div>
 
-<div id="toast" class="toast" role="status" aria-live="polite"></div>
 
+
+<div class="section" style="max-width:1400px;margin:25px auto;">
+    <h2 style="margin-bottom:15px;">Hand Summary</h2>
+
+    <h3>Showdown Results</h3>
+    <div id="results"></div>
+
+    <h3 style="margin-top:20px;">Game Log</h3>
+    <div id="log"></div>
+</div>
+
+
+
+
+<div id="rulesModal" class="rulesModal">
+  <div class="rulesContent">
+    <button onclick="closeRules()">Close</button>
+    <h2>Action Hold 'Em Rules</h2>
+
+    <h3>How to Play</h3>
+
+<p><strong>Goal:</strong> Be the first player to reach the target score. The first player to reach the target score wins immediately when that hand is scored.</p>
+
+<h4>Starting a Hand</h4>
+<ul>
+  <li>Each player starts with 2 cards.</li>
+  <li>No community cards are revealed yet.</li>
+  <li>The game begins in the Pre-Flop phase.</li>
+</ul>
+
+<h4>Your Turn</h4>
+<ol>
+  <li>Draw from either the Deck or the Discard Pile.</li>
+  <li>Discard one card from your hand.</li>
+</ol>
+
+<p>You may discard a normal card or play an Action Card. Your turn ends immediately after discarding.</p>
+
+<h4>Community Cards</h4>
+<ul>
+  <li><strong>Flop:</strong> 3 community cards are revealed.</li>
+  <li><strong>Turn:</strong> 1 additional community card is revealed.</li>
+  <li><strong>River:</strong> 1 final community card is revealed.</li>
+  <li><strong>Showdown:</strong> All hands are scored automatically.</li>
+</ul>
+
+<h4>Building Your Hand</h4>
+<ul>
+  <li>Use your hand cards and the community cards.</li>
+  <li>Only 5 cards may be used to create a scoring hand.</li>
+</ul>
+
+<h4>Important Rules</h4>
+<ul>
+  <li>Action Cards cannot appear in the community cards.</li>
+  <li>Wild Cards cannot appear in the community cards.</li>
+  <li>Action Cards cannot be drawn from the discard pile.</li>
+  <li>If you draw from the discard pile, you cannot immediately discard that same card.</li>
+  <li>No player may end their turn with more than 3 cards.</li>
+  <li>Bonus Cards cannot be played on players who already have 3 cards.</li>
+  <li>Skip causes a player to lose their next turn.</li>
+  <li>Face Up forces a player's hand to remain visible.</li>
+</ul>
+
+<h4>End of Hand</h4>
+<p>After the River round, all hands are scored, action card penalties are applied, bonuses are awarded, and scores are added to the scoreboard.</p>
+
+<hr>
+
+    <h3>Scoring</h3>
+    <ul>
+      <li>Natural Royal Flush = 500</li>
+      <li>Royal Flush = 350</li>
+      <li>Natural Straight Flush = 300</li>
+      <li>Straight Flush = 225</li>
+      <li>Natural Four of a Kind = 200</li>
+      <li>Four of a Kind = 150</li>
+      <li>Full House = 125</li>
+      <li>Flush = 100</li>
+      <li>Straight = 80</li>
+      <li>Three of a Kind = 40</li>
+      <li>Two Pair = 30</li>
+      <li>One Pair = -25</li>
+      <li>High Card = -50</li>
+    </ul>
+
+    <h3>Best Hand Bonus</h3>
+    <p>Best hand gets +30. Split among ties. No bonus if 4+ players tie.</p>
+
+    <h3>Action Cards</h3>
+    <ul>
+      <li>Skip: Target loses next turn.</li>
+      <li>Trade Hands: Swap hands with target.</li>
+      <li>Pass Left / Pass Right: Rotate all hands.</li>
+      <li>Burn: Target loses a random card.</li>
+      <li>Burn All: All opponents lose a random card.</li>
+      <li>Bonus: Draw an extra card.</li>
+      <li>Full Reset: Burn hand and draw 2 new cards.</li>
+      <li>Face Up: Hand remains visible.</li>
+      <li>Peek: View another player's hand.</li>
+      <li>Change Community: Replace a community card.</li>
+    </ul>
+
+    <h3>Wild Cards</h3>
+    <ul>
+      <li>True Wild = Any card.</li>
+      <li>Suit Wild = Any card of the matching suit.</li>
+    </ul>
+  </div>
+</div>
+
+
+<div id="handCompleteModal" class="handCompleteModal">
+  <div class="handCompleteContent">
+    <h1>🏆 HAND COMPLETE</h1>
+    <p>This hand has ended and is now being scored.</p>
+    <button onclick="closeHandCompleteModal()">View Results</button>
+  </div>
+</div>
+
+
+<div id="gameOverModal" class="gameOverModal">
+  <div class="gameOverContent">
+    <h1>🏆 GAME OVER</h1>
+    <div id="gameOverBody"></div>
+    <button onclick="closeGameOverModal()">Close</button>
+  </div>
+</div>
+
+
+
+<div id="mvpModal" class="gameOverModal">
+  <div class="gameOverContent" style="max-width:1400px;">
+    <h1>🏆 BEST HAND</h1>
+    <div id="mvpBody"></div>
+  </div>
+</div>
+
+<div id="targetModal" class="targetModal">
+
+ <div class="targetContent">
+   <h2>🎯 Choose Target</h2>
+   <div id="targetButtons"></div>
+   <button onclick="cancelTargetSelection()">Cancel</button>
+ </div>
+</div>
+
+
+<div id="turnModal" class="turnModal">
+ <div class="turnModalContent">
+   <h1>🎯 NEXT PLAYER</h1>
+   <div id="turnModalPlayer" style="font-size:38px;font-weight:900;margin:20px 0;"></div>
+   <div id="turnModalPhase" style="font-size:24px;margin-bottom:10px;"></div>
+   <div id="turnModalAction" style="font-size:20px;margin-bottom:20px;"></div>
+   <button onclick="closeTurnModalAndReveal()" style="font-size:20px;padding:12px 24px;">
+      Reveal Hand
+   </button>
+ </div>
+</div>
+
+
+<div id="streetModal" class="streetModal">
+  <div class="streetModalContent">
+    <h1 id="streetModalTitle">Street Revealed</h1>
+    <div id="streetModalBody" style="font-size:20px;margin:16px 0;"></div>
+    <button onclick="closeStreetModal()" style="font-size:18px;padding:12px 24px;">Continue</button>
+  </div>
+</div>
+
+<div id="actionHelpModal" class="actionHelpModal">
+  <div class="actionHelpContent">
+    <div id="actionHelpTitle" class="actionHelpTitle"></div>
+    <div id="actionHelpText" class="actionHelpText"></div>
+    <div id="actionHelpPenalty" class="actionHelpPenalty"></div>
+    <button onclick="confirmActionCard()" style="font-size:18px;padding:12px 24px;">Play Card</button>
+    <button onclick="cancelActionCard()" style="font-size:18px;padding:12px 24px;background:#ddd;color:#111;">Cancel</button>
+  </div>
+</div>
+
+
+<div id="actionAnimationLayer">
+    <div class="actionAnimBurst"></div>
+    <div id="actionAnimCard" class="actionAnimCard">
+        <div id="actionAnimTitle" class="actionAnimTitle"></div>
+        <div id="actionAnimIcon" class="actionAnimIcon">⚡</div>
+        <div id="actionAnimPenalty" class="actionAnimPenalty"></div>
+    </div>
+    <div id="actionAnimText" class="actionAnimText"></div>
+</div>
+
+
+<div id="fxOverlay" class="fxOverlay">
+<div id="fxCenter" class="fxCenter">⚡</div>
+</div>
+
+
+<div id="tableMotionLayer"></div>
+
+<div id="streetDealLayer"></div>
+<div id="openingDealLayer"></div>
+<script src="js/utils.js" defer></script>
+<script src="js/audio.js" defer></script>
+<script src="js/cards.js" defer></script>
 <script src="js/main.js" defer></script>
+
+<audio id="cardFlipSound">
+  <source src="assets/sounds/freesound_community-shuffleandcardflip1-40942.mp3" type="audio/mpeg">
+</audio>
+
 </body>
 </html>
