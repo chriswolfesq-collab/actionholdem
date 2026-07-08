@@ -1,2 +1,15 @@
-// Shared utilities will move here in a future cleanup pass.
-// Current game behavior is preserved in main.js for this migration step.
+(function(){
+    function escapeHtml(value){
+        return String(value ?? "").replace(/[&<>"']/g, char => ({
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+            "'": "&#39;"
+        }[char]));
+    }
+
+    window.ActionHoldemUtils = {
+        escapeHtml
+    };
+})();
