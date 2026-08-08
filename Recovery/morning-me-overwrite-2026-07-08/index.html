@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Morning Me</title>
+<link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+<a class="dashboard-link" href="https://chriswolfesq-collab.github.io/dashboard/" aria-label="Back to Wolf Games dashboard">Wolf Games</a>
+<main class="app-shell">
+    <section class="hero-band">
+        <div class="hero-copy">
+            <p class="eyebrow">Draft until daylight</p>
+            <h1>Morning Me</h1>
+            <p class="hero-subtitle">A calmer send button for nights when future-you deserves a veto.</p>
+        </div>
+        <div class="status-strip" aria-live="polite">
+            <div>
+                <span class="metric-label">Mode</span>
+                <strong id="riskModeLabel">Checking</strong>
+            </div>
+            <div>
+                <span class="metric-label">Protected</span>
+                <strong id="protectedCountLabel">0</strong>
+            </div>
+            <div>
+                <span class="metric-label">Held</span>
+                <strong id="heldCountLabel">0</strong>
+            </div>
+        </div>
+    </section>
+
+    <section class="workspace-grid">
+        <aside class="settings-panel">
+            <div class="panel-heading">
+                <h2>Guardrails</h2>
+                <button class="icon-button" id="resetDemoBtn" type="button" aria-label="Reset demo" title="Reset demo">
+                    <span aria-hidden="true">Reset</span>
+                </button>
+            </div>
+
+            <label class="switch-row">
+                <span>
+                    <strong>Protection</strong>
+                    <small>Drafts may be held during the risky window.</small>
+                </span>
+                <input id="protectionToggle" type="checkbox" checked>
+            </label>
+
+            <div class="field-row two-columns">
+                <label>
+                    <span>From</span>
+                    <input id="startTimeInput" type="time" value="22:00">
+                </label>
+                <label>
+                    <span>Until</span>
+                    <input id="endTimeInput" type="time" value="06:00">
+                </label>
+            </div>
+
+            <label class="field-row">
+                <span>Delay</span>
+                <select id="delaySelect">
+                    <option value="30">30 minutes</option>
+                    <option value="120" selected>2 hours</option>
+                    <option value="480">8 hours</option>
+                </select>
+            </label>
+
+            <div class="field-row">
+                <span class="field-title">Override Check</span>
+                <div class="segmented-control" role="group" aria-label="Override check strength">
+                    <button type="button" class="segment active" data-check="soft">Soft</button>
+                    <button type="button" class="segment" data-check="steady">Steady</button>
+                    <button type="button" class="segment" data-check="strict">Strict</button>
+                </div>
+            </div>
+
+            <div class="contact-box">
+                <div class="contact-box-header">
+                    <h3>Protected Contacts</h3>
+                    <span id="contactBadge">0</span>
+                </div>
+                <form id="contactForm" class="add-contact">
+                    <input id="contactNameInput" type="text" autocomplete="off" placeholder="Name">
+                    <button type="submit">Add</button>
+                </form>
+                <div id="contactList" class="contact-list"></div>
+            </div>
+        </aside>
+
+        <section class="phone-panel" aria-label="Message composer">
+            <div class="phone-frame">
+                <div class="phone-topbar">
+                    <div>
+                        <span class="metric-label">Recipient</span>
+                        <select id="recipientSelect"></select>
+                    </div>
+                    <span id="recipientRiskPill" class="risk-pill">Protected</span>
+                </div>
+
+                <div id="conversationPreview" class="conversation-preview"></div>
+
+                <form id="messageForm" class="composer">
+                    <textarea id="messageInput" rows="5" placeholder="Type the message you might want morning-you to review..."></textarea>
+                    <div class="composer-footer">
+                        <div id="riskScore" class="risk-score">Risk: 0</div>
+                        <button type="submit" class="primary-button">Send</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <section class="queue-panel">
+            <div class="tabs" role="tablist" aria-label="Message views">
+                <button type="button" class="tab active" data-tab="held">Held</button>
+                <button type="button" class="tab" data-tab="sent">Sent</button>
+                <button type="button" class="tab" data-tab="review">Morning</button>
+            </div>
+            <div id="queueContent" class="queue-content"></div>
+        </section>
+    </section>
+</main>
+
+<dialog id="challengeDialog" class="challenge-dialog">
+    <form method="dialog" class="challenge-card">
+        <div>
+            <p class="eyebrow">Override check</p>
+            <h2 id="challengeTitle">One quick pause</h2>
+            <p id="challengePrompt" class="challenge-prompt"></p>
+        </div>
+        <input id="challengeInput" type="text" autocomplete="off">
+        <p id="challengeFeedback" class="challenge-feedback" aria-live="polite"></p>
+        <div class="dialog-actions">
+            <button type="button" id="holdInsteadBtn">Hold</button>
+            <button type="button" id="challengeSendBtn" class="primary-button">Send Now</button>
+        </div>
+    </form>
+</dialog>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script src="js/main.js" defer></script>
+</body>
+</html>

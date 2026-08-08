@@ -1,0 +1,29 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "static-server",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "8934"],
+      "port": 8934
+    },
+    {
+      "name": "name-game-static",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "8791", "--directory", "/Users/christopherwolf/Documents/NameGame/name_game_ai_engine_2_0"],
+      "port": 8791
+    },
+    {
+      "name": "stockton-crime-watch",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "8792", "--directory", "/Users/christopherwolf/Documents/StocktonCrimeWatch"],
+      "port": 8792
+    },
+    {
+      "name": "anagram",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "8793", "--directory", "/Users/christopherwolf/Documents/Anagram"],
+      "port": 8793
+    }
+  ]
+}
