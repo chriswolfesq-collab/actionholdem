@@ -267,6 +267,7 @@ const AI_IDENTITIES=[
 
 let targetScore=500;
 let finalHandTriggered=false; // legacy variable
+let gameOver=false;
 let recentActions=[];
 let pendingActionCardIndex=null;
 let lastActionPlayerIndex=null;
@@ -1452,6 +1453,8 @@ function hideCurrentHand(){
 function startNewGame(){
     gameScores=Array(playerCount).fill(0);
     finalHandTriggered=false;
+    gameOver=false;
+    closeGameOverModal();
     handAlreadyScored=false;
     handOver=false;
     document.getElementById("results").innerHTML="";
@@ -1460,6 +1463,11 @@ function startNewGame(){
 }
 
 function startNewHand(){
+
+    if(gameOver){
+        alert("This game is complete. Choose Play Again to start a new game.");
+        return;
+    }
 
     dealerIndex=(dealerIndex+1)%playerCount;
 
@@ -1688,7 +1696,9 @@ function autoAdvanceAfterDiscard(){
 
     advanceToNextPlayer();
 
-    log("Pass device to "+currentPlayer().name+".");
+    if(!currentPlayer().isAI){
+        log("Pass device to "+currentPlayer().name+".");
+    }
 
     beginTurn();
 }
@@ -2871,8 +2881,10 @@ function renderHand(){
                     ? `onclick="previewActionCard(${i})"`
                     : `onclick="discardCard(${i})"`;
             }
+            const illegal = turnState==="MUST_DISCARD" && c.id===lastDrawnFromDiscardId;
+            if(illegal) click="";
             let html=cardHtml(c,click);
-            if(turnState==="MUST_DISCARD"){
+            if(turnState==="MUST_DISCARD" && !illegal){
                 html=html.replace('class="card ','class="card legalCard ');
             }
             return html;
@@ -3092,6 +3104,11 @@ function evaluateConcreteFive(cards, usedWild){
 }
 
 function expandAndEvaluateFive(combo){
+    // Action cards have no rank or suit. They must never reach the poker evaluator:
+    // parseStandardCard() gives every one of them rank undefined, and they would then
+    // group together as a pair / trips / quads.
+    if(combo.some(c=>c.category==="action")) return null;
+
     const wilds=combo.filter(c=>c.category==="wild");
     const naturals=combo.filter(c=>c.category!=="wild").map(parseStandardCard);
 
@@ -3100,7 +3117,7 @@ function expandAndEvaluateFive(combo){
             label:"Four of a Kind (All Wild Cards)",
             points:200,
             tie:[14],
-            cardsUsed: cards.map(c=>c.name)
+            cardsUsed: combo.map(c=>c.name)
         };
     }
 
@@ -3146,7 +3163,7 @@ function expandAndEvaluateFive(combo){
 
 function evaluatePlayerBestHand(player){
     const available=[
-        ...player.hand,
+        ...player.hand.filter(card=>card.category!=="action"),
         ...flop,
         ...(turnCard ? [turnCard] : []),
         ...(riverCard ? [riverCard] : [])
@@ -3337,6 +3354,7 @@ function showdown(){
 
         showGameOverModal(winnerMessage);
         handOver=true;
+        gameOver=true;
     }
 
     const modeLabel =
@@ -3411,9 +3429,11 @@ function updateButtons(){
     }
 
     if(nextHandBtn){
-        nextHandBtn.disabled=!handOver && !handAlreadyScored;
+        nextHandBtn.disabled=gameOver || (!handOver && !handAlreadyScored);
         if(nextHandReason){
-            nextHandReason.innerText = nextHandBtn.disabled ? "Available after scoring." : "";
+            nextHandReason.innerText =
+                gameOver ? "Game complete — choose Play Again." :
+                nextHandBtn.disabled ? "Available after scoring." : "";
         }
     }
 }
@@ -3452,7 +3472,8 @@ function updateTurnGuide(){
         return;
     }
 
-    phaseEl.innerHTML="<div class='uxTaskTitle'>YOUR TURN</div><div style='font-size:18px;font-weight:900;margin-top:4px;'>"+escapeHtml(phase+" • "+currentPlayer().name)+"</div>";
+    const turnTitle = currentPlayer() && currentPlayer().isAI ? "AI TURN" : "YOUR TURN";
+    phaseEl.innerHTML="<div class='uxTaskTitle'>"+turnTitle+"</div><div style='font-size:18px;font-weight:900;margin-top:4px;'>"+escapeHtml(phase+" • "+currentPlayer().name)+"</div>";
 
     if(currentPlayer() && currentPlayer().hand && currentPlayer().hand.length > MAX_HAND_CARDS){
         actionEl.innerHTML="<div class='handLimitWarning'>⚠️ TOO MANY CARDS<br>Discard until you have "+MAX_HAND_CARDS+" cards.</div>";

@@ -967,11 +967,17 @@ box-shadow:0 2px 6px rgba(0,0,0,.5);
     z-index:20000;
     background:radial-gradient(circle at center, #167a4a 0%, #0f5132 55%, #083b24 100%);
     display:flex;
-    align-items:center;
+    /* flex-start + margin:auto on the card, not align-items:center: centered when the
+       card fits, scrollable (not clipped at the top) when it does not. */
+    align-items:flex-start;
     justify-content:center;
+    overflow-y:auto;
+    overscroll-behavior:contain;
+    -webkit-overflow-scrolling:touch;
     padding:22px;
 }
 .startCard{
+    margin:auto;
     width:100%;
     max-width:1400px;
     background:rgba(0,0,0,.72);
