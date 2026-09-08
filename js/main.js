@@ -2761,6 +2761,7 @@ function renderHandPreview(){
 
     let label="High Card";
     let points=-50;
+    let provisional=false;
 
     const rankMap={"2":2,"3":3,"4":4,"5":5,"6":6,"7":7,"8":8,"9":9,"10":10,"J":11,"Q":12,"K":13,"A":14};
 
@@ -2776,6 +2777,11 @@ function renderHandPreview(){
         var cardsUsed=(result.cardsUsed||[]).join(" ");
 
     } else if(standardCards.length){
+
+        // Fewer than five cards are available, so evaluatePlayerBestHand() cannot
+        // build a combo. This branch gives an early read instead; mark it as
+        // provisional so it is not mistaken for a scored showdown result.
+        provisional=true;
 
         const ranks=standardCards.map(card=>{
             const rankText=card.name.slice(0,-1);
@@ -2833,7 +2839,13 @@ function renderHandPreview(){
             ${points} Points
         </div>
 
-        <div class="cardUsedLine">${typeof cardsUsed !== 'undefined' && cardsUsed ? "Using: " + cardsUsed : ""}</div>
+        <div class="cardUsedLine">${
+            typeof cardsUsed !== 'undefined' && cardsUsed
+                ? "Using: " + cardsUsed
+                : provisional
+                    ? "Provisional — " + available.length + " of 5 cards known"
+                    : ""
+        }</div>
     `;
 }
 
@@ -2847,7 +2859,21 @@ function renderHand(){
 
     if(!handRevealed && !handOver){
 
-        revealArea.innerHTML = `
+        // AI seats never get the pass-the-device handoff: there is nobody to hand
+        // the device to and nothing for a human to reveal.
+        revealArea.innerHTML = player.isAI
+            ? `
+            <div class="passScreen">
+                <div>${escapeHtml(player.avatar || "🤖")}</div>
+
+                <div class="passPlayer">
+                    ${escapeHtml(player.name)}
+                </div>
+
+                <div>is taking their turn…</div>
+            </div>
+        `
+            : `
             <div class="passScreen">
                 <div>Pass Device To</div>
 

@@ -453,12 +453,18 @@ th,td{border:1px solid #ccc;padding:7px;text-align:left;}
  inset:0;
  background:rgba(0,0,0,.8);
  z-index:10000;
+ /* JS toggles display:block inline, so this stays block layout, not flex.
+    Without overflow the dialog pushed its own button past the bottom edge
+    on short viewports with no way to scroll to it. */
+ overflow-y:auto;
+ overscroll-behavior:contain;
+ -webkit-overflow-scrolling:touch;
 }
 .handCompleteContent{
  background:white;
  color:black;
- max-width:1400px;
- margin:120px auto;
+ max-width:640px;
+ margin:clamp(16px,8vh,120px) auto;
  padding:30px;
  border-radius:16px;
  text-align:center;
@@ -476,12 +482,15 @@ th,td{border:1px solid #ccc;padding:7px;text-align:left;}
  inset:0;
  background:rgba(0,0,0,.85);
  z-index:10001;
+ overflow-y:auto;
+ overscroll-behavior:contain;
+ -webkit-overflow-scrolling:touch;
 }
 .gameOverContent{
  background:white;
  color:black;
- max-width:1400px;
- margin:80px auto;
+ max-width:720px;
+ margin:clamp(16px,6vh,80px) auto;
  padding:30px;
  border-radius:16px;
  text-align:center;
