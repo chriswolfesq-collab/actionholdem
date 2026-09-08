@@ -2759,13 +2759,8 @@ function renderHandPreview(){
         ...(riverCard ? [riverCard] : [])
     ];
 
-    let label="High Card";
-    let points=-50;
-    let provisional=false;
-
-    const rankMap={"2":2,"3":3,"4":4,"5":5,"6":6,"7":7,"8":8,"9":9,"10":10,"J":11,"Q":12,"K":13,"A":14};
-
-    const standardCards=available.filter(c=>c.category==="standard");
+    let label="Waiting For Community Cards";
+    let points=null;
 
     if(available.length >= 5){
 
@@ -2776,52 +2771,10 @@ function renderHandPreview(){
 
         var cardsUsed=(result.cardsUsed||[]).join(" ");
 
-    } else if(standardCards.length){
-
-        // Fewer than five cards are available, so evaluatePlayerBestHand() cannot
-        // build a combo. This branch gives an early read instead; mark it as
-        // provisional so it is not mistaken for a scored showdown result.
-        provisional=true;
-
-        const ranks=standardCards.map(card=>{
-            const rankText=card.name.slice(0,-1);
-            return rankMap[rankText];
-        });
-
-        const counts={};
-
-        ranks.forEach(r=>{
-            counts[r]=(counts[r]||0)+1;
-        });
-
-        const pairRank=Object.keys(counts).find(r=>counts[r] >= 2);
-
-        if(pairRank){
-
-            const rankNames={
-                "11":"Jacks",
-                "12":"Queens",
-                "13":"Kings",
-                "14":"Aces"
-            };
-
-            label="Pair of " + (rankNames[pairRank] || (pairRank + "s"));
-            points=-25;
-
-        } else {
-
-            const high=Math.max(...ranks);
-
-            const highNames={
-                11:"Jack High",
-                12:"Queen High",
-                13:"King High",
-                14:"Ace High"
-            };
-
-            label=highNames[high] || (high + " High");
-            points=-50;
-        }
+        // evaluatePlayerBestHand() also reports the waiting state when no legal
+        // five-card combo exists (e.g. a hand that is all action cards). Suppress
+        // the points line there too, so both paths look the same.
+        if(label==="Waiting For Community Cards") points=null;
     }
 
     preview.style.display = "block";
@@ -2835,16 +2788,12 @@ function renderHandPreview(){
             ${label}
         </div>
 
-        <div style="font-size:18px;margin-top:4px;">
+        ${points === null ? "" : `<div style="font-size:18px;margin-top:4px;">
             ${points} Points
-        </div>
+        </div>`}
 
         <div class="cardUsedLine">${
-            typeof cardsUsed !== 'undefined' && cardsUsed
-                ? "Using: " + cardsUsed
-                : provisional
-                    ? "Provisional — " + available.length + " of 5 cards known"
-                    : ""
+            typeof cardsUsed !== 'undefined' && cardsUsed ? "Using: " + cardsUsed : ""
         }</div>
     `;
 }
